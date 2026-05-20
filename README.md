@@ -2,6 +2,40 @@
 
 <a href="https://drive.google.com/file/d/1LQ1uG7Tt70Jubuk5loS4dMSk-1AJ5jzz/view?usp=sharing" /> Intro </a>
 
+## API testing setup
+
+This repository contains a local mock REST API and a Postman collection for automated API tests.
+
+### Local run
+
+Install dependencies:
+
+```bash
+npm install
+```
+
+Start the mock API:
+
+```bash
+npm run start-api
+```
+
+Run the Postman collection with Newman:
+
+```bash
+npm run test:api
+```
+
+The HTML report is generated at:
+
+```text
+newman-report/index.html
+```
+
+### CI/CD
+
+GitHub Actions workflow `.github/workflows/newman.yml` installs dependencies, starts the mock API, runs `store.collection.json` with Newman, uploads the Newman report as an artifact, and publishes the HTML report to GitHub Pages on every push to `main`.
+
 ## Task steps / First task
 1. Read: 
 - <a href="https://svitla.com/blog/testing-rest-api-with-postman-and-curl"> Postman & Curl & REST article </a> 

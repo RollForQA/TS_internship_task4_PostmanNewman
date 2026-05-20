@@ -109,3 +109,12 @@ users:
     signUpDate: 2019-08-24
     status: active
     level: consumer
+  - id: 10
+    firstName: asdasd
+    lastName: asd
+    email: asdasd.smith@gmail.com
+    dateOfBirth: 1997-10-31
+    emailVerified: false
+    signUpDate: 2019-08-24
+    status: active
+    level: consumer
