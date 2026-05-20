@@ -34,7 +34,15 @@ newman-report/index.html
 
 ### CI/CD
 
-GitHub Actions workflow `.github/workflows/newman.yml` installs dependencies, starts the mock API, runs `store.collection.json` with Newman, uploads the Newman report as an artifact, and publishes the HTML report to GitHub Pages on every push to `main`.
+GitHub Actions workflow `.github/workflows/newman.yml` installs dependencies, starts the mock API, runs `store.collection.json` with Newman, uploads the Newman report as an artifact, and publishes the HTML report to the `gh-pages` branch on every push to `main`.
+
+To serve the report with GitHub Pages, use repository settings:
+
+```text
+Settings -> Pages -> Build and deployment -> Deploy from a branch
+Branch: gh-pages
+Folder: /root
+```
 
 ## Task steps / First task
 1. Read: 
