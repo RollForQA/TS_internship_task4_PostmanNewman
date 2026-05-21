@@ -41,19 +41,24 @@ The project uses `yaml-server` to run a local mock API on `http://127.0.0.1:3000
 
 The successful response schemas use `additionalProperties: false`, so unexpected fields fail the test.
 
-`petstore.collection.json` covers **8 requests** and **24 assertions**:
+`petstore.collection.json` covers **27 requests** and **81 assertions**:
 
 | Area | Petstore |
 | --- | --- |
 | Dynamic pet ID generation | Yes |
-| Create pet | Yes |
-| Get created pet | Yes |
-| Update pet with form data | Yes |
-| Get updated pet | Yes |
-| Find pets by status | Yes |
-| Find pets by tag | Yes |
-| Delete pet | Yes |
-| Get deleted pet -> `404` | Yes |
+| Pet lifecycle: create -> get -> update -> get -> delete -> 404 | Yes |
+| Pet search by valid status | Yes |
+| Pet search by invalid status -> empty array | Yes |
+| Pet search by tag | Yes |
+| Pet invalid ID type -> `404` | Yes |
+| Pet missing numeric ID -> `404` | Yes |
+| Pet malformed JSON -> `400` | Yes |
+| Store order lifecycle: create -> get -> delete -> 404 | Yes |
+| Store order invalid ID type -> `404` | Yes |
+| Store order malformed JSON -> `400` | Yes |
+| User lifecycle: create -> get -> update -> get -> delete -> 404 | Yes |
+| User missing username -> `404` | Yes |
+| User malformed create/update JSON -> `400` | Yes |
 | Response time checks | Yes |
 | JSON schema validation | Yes |
 | Arrange, Act, Assert structure | Yes |
