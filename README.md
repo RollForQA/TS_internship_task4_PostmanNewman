@@ -89,6 +89,7 @@ JSON schemas are stored as collection-level variables and reused from request te
 | `mockApi/db_stage.yaml` | Generated runtime mock data, ignored by git |
 | `mockApi/dashboard_template.html` | HTML Dashboard template for the reports home page |
 | `generate-dashboard.js` | Generates `newman-report/index.html` with run metadata |
+| `run-store-ci.js` | Starts the mock API, waits for readiness, runs Store Newman tests, and resets test data |
 | `.github/workflows/newman.yml` | CI workflow for Newman and GitHub Pages report publishing |
 | `newman-report/index.html` | Local generated dashboard linking to both reports, ignored by git |
 
@@ -124,6 +125,12 @@ Run both Postman collections with Newman and generate the reports dashboard:
 npm run test:api
 ```
 
+Run the Store API suite in a self-contained CI-style flow:
+
+```bash
+npm run test:api:ci
+```
+
 Or run them individually:
 
 ```bash
@@ -132,6 +139,12 @@ npm run test:api:store
 
 # Run only Petstore API tests
 npm run test:api:petstore
+```
+
+The Petstore collection uses the collection variable `petstoreBaseUrl`. The default Newman script passes `https://petstore.swagger.io/v2`, and another target can be used without editing the collection:
+
+```bash
+newman run petstore.collection.json --env-var petstoreBaseUrl=https://petstore.swagger.io/v2
 ```
 
 The local HTML dashboard and detailed reports are generated at:
@@ -166,8 +179,8 @@ Pipeline steps:
 6. Retry the public Petstore collection once to reduce external API flakes.
 7. Generate HTML, JUnit, JSON reports and a central dashboard (`index.html`).
 8. Publish JUnit results in the GitHub Actions test summary.
-9. Upload the reports directory as a workflow artifact.
-10. Publish the dashboard and reports with the official GitHub Pages deployment flow.
+9. Upload the reports directory as a workflow artifact with an explicit 30-day retention policy.
+10. Publish the dashboard and reports with the official GitHub Pages deployment flow and expose the Pages URL in the GitHub deployment environment.
 11. Add a PR comment with the workflow artifact link.
 12. Mark the workflow as failed when any Newman collection fails.
 
@@ -176,6 +189,15 @@ GitHub Pages should be configured to serve the report from:
 ```text
 Source: GitHub Actions
 ```
+
+## Further Improvement Ideas
+
+These are useful next steps, but intentionally left outside the current scope:
+
+- Data-driven tests with Newman `--iteration-data`.
+- Cross-resource E2E flow: create user -> create product -> create order -> verify order -> cleanup.
+- Extra boundary and security-style payloads: long strings, `price = 0`, negative price, XSS-like strings, SQL-like strings.
+- Collection linting with Spectral or a similar JSON/API linting tool.
 
 ## Known Risks
 

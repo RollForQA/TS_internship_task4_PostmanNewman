@@ -62,9 +62,9 @@
               }
             ],
             "url": {
-              "raw": "{{baseUrl}}/pet",
+              "raw": "{{petstoreBaseUrl}}/pet",
               "host": [
-                "{{baseUrl}}"
+                "{{petstoreBaseUrl}}"
               ],
               "path": [
                 "pet"
@@ -127,9 +127,9 @@
               }
             ],
             "url": {
-              "raw": "{{baseUrl}}/pet/:petId",
+              "raw": "{{petstoreBaseUrl}}/pet/:petId",
               "host": [
-                "{{baseUrl}}"
+                "{{petstoreBaseUrl}}"
               ],
               "path": [
                 "pet",
@@ -190,9 +190,9 @@
               }
             ],
             "url": {
-              "raw": "{{baseUrl}}/pet/:petId",
+              "raw": "{{petstoreBaseUrl}}/pet/:petId",
               "host": [
-                "{{baseUrl}}"
+                "{{petstoreBaseUrl}}"
               ],
               "path": [
                 "pet",
@@ -270,9 +270,9 @@
               }
             ],
             "url": {
-              "raw": "{{baseUrl}}/pet/:petId",
+              "raw": "{{petstoreBaseUrl}}/pet/:petId",
               "host": [
-                "{{baseUrl}}"
+                "{{petstoreBaseUrl}}"
               ],
               "path": [
                 "pet",
@@ -332,9 +332,9 @@
               }
             ],
             "url": {
-              "raw": "{{baseUrl}}/pet/findByStatus?status=available",
+              "raw": "{{petstoreBaseUrl}}/pet/findByStatus?status=available",
               "host": [
-                "{{baseUrl}}"
+                "{{petstoreBaseUrl}}"
               ],
               "path": [
                 "pet",
@@ -393,9 +393,9 @@
               }
             ],
             "url": {
-              "raw": "{{baseUrl}}/pet/findByStatus?status=invalidStatus",
+              "raw": "{{petstoreBaseUrl}}/pet/findByStatus?status=invalidStatus",
               "host": [
-                "{{baseUrl}}"
+                "{{petstoreBaseUrl}}"
               ],
               "path": [
                 "pet",
@@ -454,9 +454,9 @@
               }
             ],
             "url": {
-              "raw": "{{baseUrl}}/pet/findByTags?tags=Large",
+              "raw": "{{petstoreBaseUrl}}/pet/findByTags?tags=Large",
               "host": [
-                "{{baseUrl}}"
+                "{{petstoreBaseUrl}}"
               ],
               "path": [
                 "pet",
@@ -515,9 +515,9 @@
               }
             ],
             "url": {
-              "raw": "{{baseUrl}}/pet/abc",
+              "raw": "{{petstoreBaseUrl}}/pet/abc",
               "host": [
-                "{{baseUrl}}"
+                "{{petstoreBaseUrl}}"
               ],
               "path": [
                 "pet",
@@ -570,9 +570,9 @@
               }
             ],
             "url": {
-              "raw": "{{baseUrl}}/pet/999999999999",
+              "raw": "{{petstoreBaseUrl}}/pet/999999999999",
               "host": [
-                "{{baseUrl}}"
+                "{{petstoreBaseUrl}}"
               ],
               "path": [
                 "pet",
@@ -629,9 +629,9 @@
               }
             ],
             "url": {
-              "raw": "{{baseUrl}}/pet",
+              "raw": "{{petstoreBaseUrl}}/pet",
               "host": [
-                "{{baseUrl}}"
+                "{{petstoreBaseUrl}}"
               ],
               "path": [
                 "pet"
@@ -693,9 +693,9 @@
               }
             ],
             "url": {
-              "raw": "{{baseUrl}}/pet/:petId",
+              "raw": "{{petstoreBaseUrl}}/pet/:petId",
               "host": [
-                "{{baseUrl}}"
+                "{{petstoreBaseUrl}}"
               ],
               "path": [
                 "pet",
@@ -757,9 +757,9 @@
               }
             ],
             "url": {
-              "raw": "{{baseUrl}}/pet/:petId",
+              "raw": "{{petstoreBaseUrl}}/pet/:petId",
               "host": [
-                "{{baseUrl}}"
+                "{{petstoreBaseUrl}}"
               ],
               "path": [
                 "pet",
@@ -776,7 +776,8 @@
           },
           "response": []
         }
-      ]
+      ],
+      "description": "Pet lifecycle and search coverage: create, read, update, delete, status/tag filters, malformed JSON, and missing resource checks."
     },
     {
       "name": "store",
@@ -837,9 +838,9 @@
               }
             ],
             "url": {
-              "raw": "{{baseUrl}}/store/order",
+              "raw": "{{petstoreBaseUrl}}/store/order",
               "host": [
-                "{{baseUrl}}"
+                "{{petstoreBaseUrl}}"
               ],
               "path": [
                 "store",
@@ -902,9 +903,9 @@
               }
             ],
             "url": {
-              "raw": "{{baseUrl}}/store/order/:orderId",
+              "raw": "{{petstoreBaseUrl}}/store/order/:orderId",
               "host": [
-                "{{baseUrl}}"
+                "{{petstoreBaseUrl}}"
               ],
               "path": [
                 "store",
@@ -965,9 +966,9 @@
               }
             ],
             "url": {
-              "raw": "{{baseUrl}}/store/order/abc",
+              "raw": "{{petstoreBaseUrl}}/store/order/abc",
               "host": [
-                "{{baseUrl}}"
+                "{{petstoreBaseUrl}}"
               ],
               "path": [
                 "store",
@@ -1025,9 +1026,9 @@
               }
             ],
             "url": {
-              "raw": "{{baseUrl}}/store/order",
+              "raw": "{{petstoreBaseUrl}}/store/order",
               "host": [
-                "{{baseUrl}}"
+                "{{petstoreBaseUrl}}"
               ],
               "path": [
                 "store",
@@ -1090,9 +1091,9 @@
               }
             ],
             "url": {
-              "raw": "{{baseUrl}}/store/order/:orderId",
+              "raw": "{{petstoreBaseUrl}}/store/order/:orderId",
               "host": [
-                "{{baseUrl}}"
+                "{{petstoreBaseUrl}}"
               ],
               "path": [
                 "store",
@@ -1156,9 +1157,9 @@
               }
             ],
             "url": {
-              "raw": "{{baseUrl}}/store/order/:orderId",
+              "raw": "{{petstoreBaseUrl}}/store/order/:orderId",
               "host": [
-                "{{baseUrl}}"
+                "{{petstoreBaseUrl}}"
               ],
               "path": [
                 "store",
@@ -1215,9 +1216,9 @@
               }
             ],
             "url": {
-              "raw": "{{baseUrl}}/store/inventory",
+              "raw": "{{petstoreBaseUrl}}/store/inventory",
               "host": [
-                "{{baseUrl}}"
+                "{{petstoreBaseUrl}}"
               ],
               "path": [
                 "store",
@@ -1227,7 +1228,8 @@
           },
           "response": []
         }
-      ]
+      ],
+      "description": "Store order coverage: order lifecycle, inventory lookup, invalid IDs, malformed payloads, and delete verification."
     },
     {
       "name": "user",
@@ -1283,9 +1285,9 @@
               }
             ],
             "url": {
-              "raw": "{{baseUrl}}/user",
+              "raw": "{{petstoreBaseUrl}}/user",
               "host": [
-                "{{baseUrl}}"
+                "{{petstoreBaseUrl}}"
               ],
               "path": [
                 "user"
@@ -1350,9 +1352,9 @@
               }
             ],
             "url": {
-              "raw": "{{baseUrl}}/user/:username",
+              "raw": "{{petstoreBaseUrl}}/user/:username",
               "host": [
-                "{{baseUrl}}"
+                "{{petstoreBaseUrl}}"
               ],
               "path": [
                 "user",
@@ -1417,9 +1419,9 @@
               }
             ],
             "url": {
-              "raw": "{{baseUrl}}/user/:username",
+              "raw": "{{petstoreBaseUrl}}/user/:username",
               "host": [
-                "{{baseUrl}}"
+                "{{petstoreBaseUrl}}"
               ],
               "path": [
                 "user",
@@ -1493,9 +1495,9 @@
               }
             ],
             "url": {
-              "raw": "{{baseUrl}}/user/:username",
+              "raw": "{{petstoreBaseUrl}}/user/:username",
               "host": [
-                "{{baseUrl}}"
+                "{{petstoreBaseUrl}}"
               ],
               "path": [
                 "user",
@@ -1552,9 +1554,9 @@
               }
             ],
             "url": {
-              "raw": "{{baseUrl}}/user/login?username={{dynamicUsername}}&password=pass123",
+              "raw": "{{petstoreBaseUrl}}/user/login?username={{dynamicUsername}}&password=pass123",
               "host": [
-                "{{baseUrl}}"
+                "{{petstoreBaseUrl}}"
               ],
               "path": [
                 "user",
@@ -1614,9 +1616,9 @@
               }
             ],
             "url": {
-              "raw": "{{baseUrl}}/user/logout",
+              "raw": "{{petstoreBaseUrl}}/user/logout",
               "host": [
-                "{{baseUrl}}"
+                "{{petstoreBaseUrl}}"
               ],
               "path": [
                 "user",
@@ -1669,9 +1671,9 @@
               }
             ],
             "url": {
-              "raw": "{{baseUrl}}/user/no_such_user_codex_999999",
+              "raw": "{{petstoreBaseUrl}}/user/no_such_user_codex_999999",
               "host": [
-                "{{baseUrl}}"
+                "{{petstoreBaseUrl}}"
               ],
               "path": [
                 "user",
@@ -1728,9 +1730,9 @@
               }
             ],
             "url": {
-              "raw": "{{baseUrl}}/user",
+              "raw": "{{petstoreBaseUrl}}/user",
               "host": [
-                "{{baseUrl}}"
+                "{{petstoreBaseUrl}}"
               ],
               "path": [
                 "user"
@@ -1795,9 +1797,9 @@
               }
             ],
             "url": {
-              "raw": "{{baseUrl}}/user/:username",
+              "raw": "{{petstoreBaseUrl}}/user/:username",
               "host": [
-                "{{baseUrl}}"
+                "{{petstoreBaseUrl}}"
               ],
               "path": [
                 "user",
@@ -1867,9 +1869,9 @@
               }
             ],
             "url": {
-              "raw": "{{baseUrl}}/user/:username",
+              "raw": "{{petstoreBaseUrl}}/user/:username",
               "host": [
-                "{{baseUrl}}"
+                "{{petstoreBaseUrl}}"
               ],
               "path": [
                 "user",
@@ -1932,9 +1934,9 @@
               }
             ],
             "url": {
-              "raw": "{{baseUrl}}/user/:username",
+              "raw": "{{petstoreBaseUrl}}/user/:username",
               "host": [
-                "{{baseUrl}}"
+                "{{petstoreBaseUrl}}"
               ],
               "path": [
                 "user",
@@ -1951,12 +1953,13 @@
           },
           "response": []
         }
-      ]
+      ],
+      "description": "User account coverage: create, read, update, login/logout, malformed payloads, missing users, and cleanup."
     }
   ],
   "variable": [
     {
-      "key": "baseUrl",
+      "key": "petstoreBaseUrl",
       "value": "https://petstore.swagger.io/v2",
       "type": "string"
     },

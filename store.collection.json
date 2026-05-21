@@ -1524,7 +1524,8 @@
           },
           "response": []
         }
-      ]
+      ],
+      "description": "Products coverage: list, pagination, sorting, schema validation, CRUD lifecycle, invalid IDs, validation errors, and cleanup."
     },
     {
       "name": "Orders",
@@ -2934,7 +2935,8 @@
           },
           "response": []
         }
-      ]
+      ],
+      "description": "Orders coverage: list, pagination, sorting, schema validation, CRUD lifecycle, invalid IDs, validation errors, and cleanup."
     },
     {
       "name": "Users",
@@ -4358,7 +4360,8 @@
           },
           "response": []
         }
-      ]
+      ],
+      "description": "Users coverage: list, pagination, sorting, schema validation, CRUD lifecycle, invalid IDs, validation errors, and cleanup."
     }
   ],
   "event": [

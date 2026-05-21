@@ -23,6 +23,9 @@ concurrency:
 jobs:
   api-tests:
     runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
     env:
       API_URL: http://127.0.0.1:3000
 
@@ -85,6 +88,7 @@ jobs:
         with:
           name: newman-report
           path: newman-report
+          retention-days: 30
           if-no-files-found: error
 
       - name: Configure GitHub Pages
