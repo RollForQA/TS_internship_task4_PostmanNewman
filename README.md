@@ -2,7 +2,7 @@
 
 [![Newman API tests](https://github.com/RollForQA/TS_internship_task4_PostmanNewman/actions/workflows/newman.yml/badge.svg)](https://github.com/RollForQA/TS_internship_task4_PostmanNewman/actions/workflows/newman.yml)
 
-Automated API testing project for a local mock Store REST API. The Postman collection is executed with Newman in GitHub Actions, and the latest HTML report is published to GitHub Pages.
+Automated API testing project for a local mock Store REST API and the public Swagger Petstore API. The Postman collections are executed with Newman in GitHub Actions, and the latest HTML dashboard is published to GitHub Pages.
 
 - GitHub Actions: [Newman API tests](https://github.com/RollForQA/TS_internship_task4_PostmanNewman/actions/workflows/newman.yml)
 - Newman HTML report: [GitHub Pages report](https://rollforqa.github.io/TS_internship_task4_PostmanNewman/)
@@ -19,7 +19,7 @@ The project uses `yaml-server` to run a local mock API on `http://127.0.0.1:3000
 
 ## Test Coverage
 
-`store.collection.json` currently covers **51 requests** and **201 assertions**.
+`store.collection.json` covers **51 requests** and **201 assertions**.
 
 | Area | Products | Orders | Users |
 | --- | --- | --- | --- |
@@ -41,16 +41,36 @@ The project uses `yaml-server` to run a local mock API on `http://127.0.0.1:3000
 
 The successful response schemas use `additionalProperties: false`, so unexpected fields fail the test.
 
+`petstore.collection.json` covers **8 requests** and **24 assertions**:
+
+| Area | Petstore |
+| --- | --- |
+| Dynamic pet ID generation | Yes |
+| Create pet | Yes |
+| Get created pet | Yes |
+| Update pet with form data | Yes |
+| Get updated pet | Yes |
+| Find pets by status | Yes |
+| Find pets by tag | Yes |
+| Delete pet | Yes |
+| Get deleted pet -> `404` | Yes |
+| Response time checks | Yes |
+| JSON schema validation | Yes |
+| Arrange, Act, Assert structure | Yes |
+
 ## Project Files
 
 | File | Purpose |
 | --- | --- |
-| `store.collection.json` | Main Postman collection with all API tests |
+| `store.collection.json` | Postman collection for the local Mock API |
+| `petstore.collection.json` | Postman collection for the public Swagger Petstore API |
 | `store.environment.json` | Postman environment with `baseUrl` |
 | `mockApi/db_back_up.yaml` | Source mock data |
-| `mockApi/db_stage.yaml` | Runtime mock data copied from backup before API start |
+| `mockApi/db_stage.yaml` | Generated runtime mock data, ignored by git |
+| `mockApi/dashboard_template.html` | HTML Dashboard template for the reports home page |
+| `generate-dashboard.js` | Generates `newman-report/index.html` with run metadata |
 | `.github/workflows/newman.yml` | CI workflow for Newman and GitHub Pages report publishing |
-| `newman-report/index.html` | Local generated report, ignored by git |
+| `newman-report/index.html` | Local generated dashboard linking to both reports, ignored by git |
 
 ## Local Run
 
@@ -78,16 +98,28 @@ The corrected alias is available too:
 npm run turn-on-api
 ```
 
-Run the Postman collection with Newman:
+Run both Postman collections with Newman and generate the reports dashboard:
 
 ```bash
 npm run test:api
 ```
 
-The local HTML report is generated at:
+Or run them individually:
+
+```bash
+# Run only Store API tests
+npm run test:api:store
+
+# Run only Petstore API tests
+npm run test:api:petstore
+```
+
+The local HTML dashboard and detailed reports are generated at:
 
 ```text
-newman-report/index.html
+newman-report/index.html      # Main Dashboard
+newman-report/store.html     # Store API report
+newman-report/petstore.html  # Petstore API report
 ```
 
 ## CI/CD
@@ -100,10 +132,11 @@ Pipeline steps:
 2. Install Node.js dependencies with `npm ci`.
 3. Start the local mock API.
 4. Wait until the API is available.
-5. Run `store.collection.json` with Newman.
-6. Generate an HTML report with `newman-reporter-htmlextra`.
-7. Upload the report as a workflow artifact.
-8. Publish the latest report to the `gh-pages` branch.
+5. Run both `store.collection.json` and `petstore.collection.json` with Newman.
+6. Generate HTML reports and a central dashboard (`index.html`).
+7. Upload the reports directory as a workflow artifact.
+8. Publish the dashboard and reports to the `gh-pages` branch even when a Newman assertion fails.
+9. Mark the workflow as failed when any Newman collection fails.
 
 GitHub Pages is configured to serve the report from:
 

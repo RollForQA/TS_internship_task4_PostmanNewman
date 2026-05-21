@@ -39,8 +39,22 @@ jobs:
       - name: Wait for mock API
         run: npm run wait-api
 
-      - name: Run Newman collection
-        run: npm run test:api
+      - name: Run Store API Newman collection
+        id: store_tests
+        continue-on-error: true
+        run: npm run test:api:store
+
+      - name: Run Petstore API Newman collection
+        id: petstore_tests
+        continue-on-error: true
+        run: npm run test:api:petstore
+
+      - name: Generate reports dashboard
+        if: always()
+        env:
+          STORE_OUTCOME: ${{ steps.store_tests.outcome }}
+          PETSTORE_OUTCOME: ${{ steps.petstore_tests.outcome }}
+        run: npm run generate-dashboard
 
       - name: Upload Newman report artifact
         uses: actions/upload-artifact@v4
@@ -52,9 +66,13 @@ jobs:
 
       - name: Deploy Newman report to GitHub Pages branch
         uses: peaceiris/actions-gh-pages@v4
-        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        if: always() && github.event_name == 'push' && github.ref == 'refs/heads/main'
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_branch: gh-pages
           publish_dir: ./newman-report
           force_orphan: true
+
+      - name: Fail workflow if Newman tests failed
+        if: always() && (steps.store_tests.outcome != 'success' || steps.petstore_tests.outcome != 'success')
+        run: exit 1

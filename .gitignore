@@ -1,3 +1,4 @@
 node_modules/
 newman-report/
 *.log
+mockApi/db_stage.yaml
