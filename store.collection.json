@@ -692,11 +692,11 @@
                   "});",
                   "",
                   "const baseUrl = pm.environment.get(\"baseUrl\") || pm.collectionVariables.get(\"baseUrl\");",
-                  "pm.sendRequest(`${baseUrl}/products`, function (error, response) {",
+                  "pm.sendRequest({ url: `${baseUrl}/products`, method: \"GET\", header: { \"Connection\": \"close\" } }, function (error, response) {",
                   "    if (error || !response) return;",
                   "    response.json()",
                   "        .filter((item) => !item.name || !item.description || item.sku === 111)",
-                  "        .forEach((item) => pm.sendRequest({ url: `${baseUrl}/products/${item.id}`, method: \"DELETE\" }, function () {}));",
+                  "        .forEach((item) => pm.sendRequest({ url: `${baseUrl}/products/${item.id}`, method: \"DELETE\", header: { \"Connection\": \"close\" } }, function () {}));",
                   "});"
                 ],
                 "type": "text/javascript"
@@ -727,11 +727,11 @@
                   "});",
                   "",
                   "const baseUrl = pm.environment.get(\"baseUrl\") || pm.collectionVariables.get(\"baseUrl\");",
-                  "pm.sendRequest(`${baseUrl}/products`, function (error, response) {",
+                  "pm.sendRequest({ url: `${baseUrl}/products`, method: \"GET\", header: { \"Connection\": \"close\" } }, function (error, response) {",
                   "    if (error || !response) return;",
                   "    response.json()",
                   "        .filter((item) => item.sku === \"EXTRA-FIELD\")",
-                  "        .forEach((item) => pm.sendRequest({ url: `${baseUrl}/products/${item.id}`, method: \"DELETE\" }, function () {}));",
+                  "        .forEach((item) => pm.sendRequest({ url: `${baseUrl}/products/${item.id}`, method: \"DELETE\", header: { \"Connection\": \"close\" } }, function () {}));",
                   "});"
                 ],
                 "type": "text/javascript"
@@ -1487,11 +1487,11 @@
                   "});",
                   "",
                   "const baseUrl = pm.environment.get(\"baseUrl\") || pm.collectionVariables.get(\"baseUrl\");",
-                  "pm.sendRequest(`${baseUrl}/products`, function (error, response) {",
+                  "pm.sendRequest({ url: `${baseUrl}/products`, method: \"GET\", header: { \"Connection\": \"close\" } }, function (error, response) {",
                   "    if (error || !response) return;",
                   "    response.json()",
                   "        .filter((item) => !item.name || !item.description || item.sku === 111)",
-                  "        .forEach((item) => pm.sendRequest({ url: `${baseUrl}/products/${item.id}`, method: \"DELETE\" }, function () {}));",
+                  "        .forEach((item) => pm.sendRequest({ url: `${baseUrl}/products/${item.id}`, method: \"DELETE\", header: { \"Connection\": \"close\" } }, function () {}));",
                   "});"
                 ]
               }
@@ -2110,11 +2110,11 @@
                   "});",
                   "",
                   "const baseUrl = pm.environment.get(\"baseUrl\") || pm.collectionVariables.get(\"baseUrl\");",
-                  "pm.sendRequest(`${baseUrl}/orders`, function (error, response) {",
+                  "pm.sendRequest({ url: `${baseUrl}/orders`, method: \"GET\", header: { \"Connection\": \"close\" } }, function (error, response) {",
                   "    if (error || !response) return;",
                   "    response.json()",
                   "        .filter((item) => !item.name || item.sku === 777777777777)",
-                  "        .forEach((item) => pm.sendRequest({ url: `${baseUrl}/orders/${item.id}`, method: \"DELETE\" }, function () {}));",
+                  "        .forEach((item) => pm.sendRequest({ url: `${baseUrl}/orders/${item.id}`, method: \"DELETE\", header: { \"Connection\": \"close\" } }, function () {}));",
                   "});"
                 ],
                 "type": "text/javascript"
@@ -2145,11 +2145,11 @@
                   "});",
                   "",
                   "const baseUrl = pm.environment.get(\"baseUrl\") || pm.collectionVariables.get(\"baseUrl\");",
-                  "pm.sendRequest(`${baseUrl}/orders`, function (error, response) {",
+                  "pm.sendRequest({ url: `${baseUrl}/orders`, method: \"GET\", header: { \"Connection\": \"close\" } }, function (error, response) {",
                   "    if (error || !response) return;",
                   "    response.json()",
                   "        .filter((item) => item.sku === \"ORDER-EXTRA\")",
-                  "        .forEach((item) => pm.sendRequest({ url: `${baseUrl}/orders/${item.id}`, method: \"DELETE\" }, function () {}));",
+                  "        .forEach((item) => pm.sendRequest({ url: `${baseUrl}/orders/${item.id}`, method: \"DELETE\", header: { \"Connection\": \"close\" } }, function () {}));",
                   "});"
                 ],
                 "type": "text/javascript"
@@ -2897,11 +2897,11 @@
                   "});",
                   "",
                   "const baseUrl = pm.environment.get(\"baseUrl\") || pm.collectionVariables.get(\"baseUrl\");",
-                  "pm.sendRequest(`${baseUrl}/orders`, function (error, response) {",
+                  "pm.sendRequest({ url: `${baseUrl}/orders`, method: \"GET\", header: { \"Connection\": \"close\" } }, function (error, response) {",
                   "    if (error || !response) return;",
                   "    response.json()",
                   "        .filter((item) => !item.name || item.sku === 777777777777)",
-                  "        .forEach((item) => pm.sendRequest({ url: `${baseUrl}/orders/${item.id}`, method: \"DELETE\" }, function () {}));",
+                  "        .forEach((item) => pm.sendRequest({ url: `${baseUrl}/orders/${item.id}`, method: \"DELETE\", header: { \"Connection\": \"close\" } }, function () {}));",
                   "});"
                 ]
               }
@@ -3520,11 +3520,11 @@
                   "});",
                   "",
                   "const baseUrl = pm.environment.get(\"baseUrl\") || pm.collectionVariables.get(\"baseUrl\");",
-                  "pm.sendRequest(`${baseUrl}/users`, function (error, response) {",
+                  "pm.sendRequest({ url: `${baseUrl}/users`, method: \"GET\", header: { \"Connection\": \"close\" } }, function (error, response) {",
                   "    if (error || !response) return;",
                   "    response.json()",
                   "        .filter((item) => !item.firstName || item.email === \"missing.fields@example.com\")",
-                  "        .forEach((item) => pm.sendRequest({ url: `${baseUrl}/users/${item.id}`, method: \"DELETE\" }, function () {}));",
+                  "        .forEach((item) => pm.sendRequest({ url: `${baseUrl}/users/${item.id}`, method: \"DELETE\", header: { \"Connection\": \"close\" } }, function () {}));",
                   "});"
                 ],
                 "type": "text/javascript"
@@ -3555,11 +3555,11 @@
                   "});",
                   "",
                   "const baseUrl = pm.environment.get(\"baseUrl\") || pm.collectionVariables.get(\"baseUrl\");",
-                  "pm.sendRequest(`${baseUrl}/users`, function (error, response) {",
+                  "pm.sendRequest({ url: `${baseUrl}/users`, method: \"GET\", header: { \"Connection\": \"close\" } }, function (error, response) {",
                   "    if (error || !response) return;",
                   "    response.json()",
                   "        .filter((item) => item.email === \"extra.field@example.test\")",
-                  "        .forEach((item) => pm.sendRequest({ url: `${baseUrl}/users/${item.id}`, method: \"DELETE\" }, function () {}));",
+                  "        .forEach((item) => pm.sendRequest({ url: `${baseUrl}/users/${item.id}`, method: \"DELETE\", header: { \"Connection\": \"close\" } }, function () {}));",
                   "});"
                 ],
                 "type": "text/javascript"
@@ -4321,11 +4321,11 @@
                   "});",
                   "",
                   "const baseUrl = pm.environment.get(\"baseUrl\") || pm.collectionVariables.get(\"baseUrl\");",
-                  "pm.sendRequest(`${baseUrl}/users`, function (error, response) {",
+                  "pm.sendRequest({ url: `${baseUrl}/users`, method: \"GET\", header: { \"Connection\": \"close\" } }, function (error, response) {",
                   "    if (error || !response) return;",
                   "    response.json()",
                   "        .filter((item) => !item.firstName || item.email === \"missing.fields@example.com\")",
-                  "        .forEach((item) => pm.sendRequest({ url: `${baseUrl}/users/${item.id}`, method: \"DELETE\" }, function () {}));",
+                  "        .forEach((item) => pm.sendRequest({ url: `${baseUrl}/users/${item.id}`, method: \"DELETE\", header: { \"Connection\": \"close\" } }, function () {}));",
                   "});"
                 ]
               }
