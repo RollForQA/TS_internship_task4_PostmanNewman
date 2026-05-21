@@ -189,26 +189,3 @@ GitHub Pages should be configured to serve the report from:
 ```text
 Source: GitHub Actions
 ```
-
-## Further Improvement Ideas
-
-These are useful next steps, but intentionally left outside the current scope:
-
-- Data-driven tests with Newman `--iteration-data`.
-- Cross-resource E2E flow: create user -> create product -> create order -> verify order -> cleanup.
-- Extra boundary and security-style payloads: long strings, `price = 0`, negative price, XSS-like strings, SQL-like strings.
-- Collection linting with Spectral or a similar JSON/API linting tool.
-
-## Known Risks
-
-The Petstore suite uses a public API, so it can fail because of network, TLS, rate-limit, or upstream data issues. The Newman command uses request/script timeouts, `--insecure` for local certificate compatibility, and one CI retry to keep those failures visible but less noisy.
-
-`newman-report/`, `mockApi/db_stage.yaml`, and `*.log` are intentionally ignored by git because they are generated locally or in CI.
-
-## Learning References
-
-- [Testing REST API with Postman and curl](https://svitla.com/blog/testing-rest-api-with-postman-and-curl/)
-- [Postman test examples](https://learning.postman.com/docs/tests-and-scripts/write-scripts/test-examples)
-- [Postman Answers workspace](https://www.postman.com/postman/postman-answers/overview)
-- [REST API tutorial](https://restfulapi.net/)
-- [JSON Schema](https://json-schema.org/)
