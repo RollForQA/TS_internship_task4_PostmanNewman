@@ -32,6 +32,19 @@ The HTML report is generated at:
 newman-report/index.html
 ```
 
+### Test coverage
+
+`store.collection.json` covers 27 requests and 102 assertions:
+
+- CRUD operations for `/products`, `/orders`, and `/users`.
+- Pagination checks for all resources.
+- Sorting checks for all resources.
+- Positive status checks: `200` and `201`.
+- Negative status checks: `404` for missing resources and `400` for malformed JSON.
+- Response time checks.
+- JSON schema validation for successful JSON responses.
+- Tests are structured with Arrange, Act, Assert blocks.
+
 ### CI/CD
 
 GitHub Actions workflow `.github/workflows/newman.yml` installs dependencies, starts the mock API, runs `store.collection.json` with Newman, uploads the Newman report as an artifact, and publishes the HTML report to the `gh-pages` branch on every push to `main`.
