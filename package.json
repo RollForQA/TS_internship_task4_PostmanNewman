@@ -5,9 +5,10 @@
   "scripts": {
     "reset-db": "node -e \"require('fs').copyFileSync('mockApi/db_back_up.yaml','mockApi/db_stage.yaml')\"",
     "start-api": "node -e \"require('fs').copyFileSync('mockApi/db_back_up.yaml','mockApi/db_stage.yaml')\" && yaml-server --hotReload=off --autoStart=off --port 3000 --database ./mockApi/db_stage.yaml",
+    "turn-on-api": "npm run start-api",
     "tern-on-api": "npm run start-api",
     "wait-api": "wait-on http://127.0.0.1:3000/products",
-    "test:api": "newman run store.collection.json --env-var baseUrl=http://127.0.0.1:3000 --reporters cli,htmlextra --reporter-htmlextra-export newman-report/index.html --reporter-htmlextra-title \"Store API Newman Report\""
+    "test:api": "newman run store.collection.json --environment store.environment.json --env-var baseUrl=http://127.0.0.1:3000 --reporters cli,htmlextra --reporter-htmlextra-export newman-report/index.html --reporter-htmlextra-title \"Store API Newman Report\""
   },
   "keywords": [
     "api",

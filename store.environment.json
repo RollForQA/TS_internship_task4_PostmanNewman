@@ -1,0 +1,14 @@
+{
+  "id": "0c8d20dd-9b5e-4c34-94b1-96dfbb1a3f2d",
+  "name": "Store local environment",
+  "values": [
+    {
+      "key": "baseUrl",
+      "value": "http://127.0.0.1:3000",
+      "type": "default",
+      "enabled": true
+    }
+  ],
+  "_postman_variable_scope": "environment",
+  "_postman_exported_using": "Codex"
+}

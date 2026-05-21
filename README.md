@@ -1,12 +1,58 @@
-# Postman + newman + github actions (Simple store template)
+# Store API Postman/Newman Tests
 
-<a href="https://drive.google.com/file/d/1LQ1uG7Tt70Jubuk5loS4dMSk-1AJ5jzz/view?usp=sharing" /> Intro </a>
+[![Newman API tests](https://github.com/RollForQA/TS_internship_task4_PostmanNewman/actions/workflows/newman.yml/badge.svg)](https://github.com/RollForQA/TS_internship_task4_PostmanNewman/actions/workflows/newman.yml)
 
-## API testing setup
+Automated API testing project for a local mock Store REST API. The Postman collection is executed with Newman in GitHub Actions, and the latest HTML report is published to GitHub Pages.
 
-This repository contains a local mock REST API and a Postman collection for automated API tests.
+- GitHub Actions: [Newman API tests](https://github.com/RollForQA/TS_internship_task4_PostmanNewman/actions/workflows/newman.yml)
+- Newman HTML report: [GitHub Pages report](https://rollforqa.github.io/TS_internship_task4_PostmanNewman/)
 
-### Local run
+## Tested API
+
+The project uses `yaml-server` to run a local mock API on `http://127.0.0.1:3000`.
+
+| Resource | Operations |
+| --- | --- |
+| `/products` | `GET`, `GET /:id`, `POST`, `PUT`, `DELETE /:id` |
+| `/orders` | `GET`, `GET /:id`, `POST`, `PUT`, `DELETE /:id` |
+| `/users` | `GET`, `GET /:id`, `POST`, `PUT`, `DELETE /:id` |
+
+## Test Coverage
+
+`store.collection.json` currently covers **51 requests** and **201 assertions**.
+
+| Area | Products | Orders | Users |
+| --- | --- | --- | --- |
+| CRUD endpoints | Yes | Yes | Yes |
+| Full lifecycle: create -> get -> update -> get -> delete -> 404 | Yes | Yes | Yes |
+| Dynamic IDs via collection variables | Yes | Yes | Yes |
+| Pagination: normal page | Yes | Yes | Yes |
+| Pagination: empty/out-of-range page | Yes | Yes | Yes |
+| Pagination: zero page size | Yes | Yes | Yes |
+| Sorting ASC | Yes | Yes | Yes |
+| Sorting DESC | Yes | Yes | Yes |
+| Missing numeric ID -> `404` | Yes | Yes | Yes |
+| Invalid ID type -> `404` | Yes | Yes | Yes |
+| Missing required fields -> `400` | Yes | Yes | Yes |
+| Malformed JSON -> `400` | Yes | Yes | Yes |
+| Response time checks | Yes | Yes | Yes |
+| Strict JSON schema validation | Yes | Yes | Yes |
+| Arrange, Act, Assert structure | Yes | Yes | Yes |
+
+The successful response schemas use `additionalProperties: false`, so unexpected fields fail the test.
+
+## Project Files
+
+| File | Purpose |
+| --- | --- |
+| `store.collection.json` | Main Postman collection with all API tests |
+| `store.environment.json` | Postman environment with `baseUrl` |
+| `mockApi/db_back_up.yaml` | Source mock data |
+| `mockApi/db_stage.yaml` | Runtime mock data copied from backup before API start |
+| `.github/workflows/newman.yml` | CI workflow for Newman and GitHub Pages report publishing |
+| `newman-report/index.html` | Local generated report, ignored by git |
+
+## Local Run
 
 Install dependencies:
 
@@ -20,90 +66,56 @@ Start the mock API:
 npm run start-api
 ```
 
+The original task command is also supported:
+
+```bash
+npm run tern-on-api
+```
+
+The corrected alias is available too:
+
+```bash
+npm run turn-on-api
+```
+
 Run the Postman collection with Newman:
 
 ```bash
 npm run test:api
 ```
 
-The HTML report is generated at:
+The local HTML report is generated at:
 
 ```text
 newman-report/index.html
 ```
 
-### Test coverage
+## CI/CD
 
-`store.collection.json` covers 27 requests and 102 assertions:
+The workflow `.github/workflows/newman.yml` runs on push and pull request to `main`.
 
-- CRUD operations for `/products`, `/orders`, and `/users`.
-- Pagination checks for all resources.
-- Sorting checks for all resources.
-- Positive status checks: `200` and `201`.
-- Negative status checks: `404` for missing resources and `400` for malformed JSON.
-- Response time checks.
-- JSON schema validation for successful JSON responses.
-- Tests are structured with Arrange, Act, Assert blocks.
+Pipeline steps:
 
-### CI/CD
+1. Checkout repository.
+2. Install Node.js dependencies with `npm ci`.
+3. Start the local mock API.
+4. Wait until the API is available.
+5. Run `store.collection.json` with Newman.
+6. Generate an HTML report with `newman-reporter-htmlextra`.
+7. Upload the report as a workflow artifact.
+8. Publish the latest report to the `gh-pages` branch.
 
-GitHub Actions workflow `.github/workflows/newman.yml` installs dependencies, starts the mock API, runs `store.collection.json` with Newman, uploads the Newman report as an artifact, and publishes the HTML report to the `gh-pages` branch on every push to `main`.
-
-To serve the report with GitHub Pages, use repository settings:
+GitHub Pages is configured to serve the report from:
 
 ```text
-Settings -> Pages -> Build and deployment -> Deploy from a branch
 Branch: gh-pages
 Folder: /root
 ```
 
-## Task steps / First task
-1. Read: 
-- <a href="https://svitla.com/blog/testing-rest-api-with-postman-and-curl"> Postman & Curl & REST article </a> 
-- <a href="https://learning.postman.com/docs/writing-scripts/script-references/test-examples/">Postman tests examples (off doc)</a>
-- <a href="https://drive.google.com/file/d/1ftlfK91TXTS9GH7ufEXsGujop_LpC5ef/view?usp=sharing" /> Manual schema generation </a>
-2. Download this repo.
-3. Run `npm i` (install node.js dependencies)
-4. Run `npm run tern-on-api`(to run testing server locally )
+## Learning References
 
-### Overview of local server testing
-Routes `/products`, `/orders` and `/users`. Below is a table of supported operations with `products` as example resource. The same operations are also supports for `orders/` and `users/`.
-
-| VERB     |Route          | Input      | Output             |
-|----------|---------------|------------|--------------------|
-| GET      | /products     | *None*     | **Array**          |
-| GET      | /products/:id |  **e.g 3** | **Object**         |
-| POST     | /products     | **object** | **Created object** |
-| PUT      | /products     | **object** | **Updated object** |
-| DELETE   | /products/:id | **e.g 3**  | **Deleted object** |
-
-
-5. Upload `store.collection.json` in Postman app. (skip this exhibit in case you decide to use another public API ) 
-6. Make some integration tests in Postman, could be status code/JSON check and so on. ( in case with another API - write tests based on another one).
-
-Examples:
-- Test pagination, by way like `http://localhost:3000/users?page=1&pageSize=2`. 
-- Test sorting, by way like `http://localhost:3000/users?sortOrder=ASC&sortKey=firstName`. You can sort an any resource response using query parameters sortOrder and sortKey.
--  Test status code for REST API (200,400 and so on).
--  Test response time.
--  Test response thanks to json schema validation.
--  Try to follow `AAA` approach (arrange, act, assert).
-
-7. Save new collection with your new integration tests with the same name as `store.collection.json`. ( in case with another API - another file name for json file)
-8. Push to you github repo in main branch ( in case with local server - save local server as well )
-
-###  GH actions practice / Second Task
-9. Add Github action to run `petstore.collection.json` in Github pages by <a href="https://www.linkedin.com/pulse/running-postman-collections-via-github-action-nirmala-jayasanka"> article </a> or use another GH action.
-10. Check github actions for result.
-
-
-You can use another API to perform  your testing instead of local store API and `store.collection.json`. 
-- <a href="https://github.com/public-apis/public-apis"> Public API list </a>
-
-### Usefull links (skip this)
-Examples with different actions in Postman workspace (only take a look once, no need to learn this) 
-- <a href="https://www.postman.com/postman/workspace/postman-answers"> Postman answers </a>
-- <a href="https://restfulapi.net"> REST API Tutorial </a>
-
-Doc for json schema validation, to check output API response (only take a look once, no need to learn this doc) 
-- <a href="https://json-schema.org"> json schema docs </a>
+- [Testing REST API with Postman and curl](https://svitla.com/blog/testing-rest-api-with-postman-and-curl/)
+- [Postman test examples](https://learning.postman.com/docs/tests-and-scripts/write-scripts/test-examples)
+- [Postman Answers workspace](https://www.postman.com/postman/postman-answers/overview)
+- [REST API tutorial](https://restfulapi.net/)
+- [JSON Schema](https://json-schema.org/)

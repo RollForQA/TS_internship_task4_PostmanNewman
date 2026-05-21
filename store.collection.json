@@ -64,7 +64,7 @@
 									"    pm.expect(actualContentType).to.include(expectedContentType);",
 									"});",
 									"",
-									"pm.test(\"Products list matches JSON schema\", function () {",
+									"pm.test(\"Products list matches strict JSON schema\", function () {",
 									"    // Arrange",
 									"    const itemSchema = {",
 									"    \"type\": \"object\",",
@@ -75,6 +75,7 @@
 									"        \"sku\",",
 									"        \"description\"",
 									"    ],",
+									"    \"additionalProperties\": false,",
 									"    \"properties\": {",
 									"        \"id\": {",
 									"            \"type\": \"number\"",
@@ -93,11 +94,7 @@
 									"        }",
 									"    }",
 									"};",
-									"    const responseSchema = {",
-									"        type: \"array\",",
-									"        minItems: 1,",
-									"        items: itemSchema",
-									"    };",
+									"    const responseSchema = { type: \"array\", minItems: 1, items: itemSchema };",
 									"",
 									"    // Act",
 									"    const responseBody = pm.response.json();",
@@ -105,6 +102,23 @@
 									"    // Assert",
 									"    pm.response.to.have.jsonSchema(responseSchema);",
 									"    pm.expect(responseBody).to.be.an(\"array\").that.is.not.empty;",
+									"});",
+									"",
+									"pm.test(\"Existing product id is stored for dependent requests\", function () {",
+									"    // Arrange",
+									"    const fixture = {",
+									"    \"id\": 3,",
+									"    \"name\": \"apple\",",
+									"    \"price\": 30",
+									"};",
+									"",
+									"    // Act",
+									"    const responseBody = pm.response.json();",
+									"    const existingItem = responseBody.find((item) => item.id === fixture.id);",
+									"",
+									"    // Assert",
+									"    pm.expect(existingItem).to.include(fixture);",
+									"    pm.collectionVariables.set(\"productExistingId\", existingItem.id);",
 									"});"
 								],
 								"type": "text/javascript"
@@ -188,6 +202,7 @@
 									"        \"sku\",",
 									"        \"description\"",
 									"    ],",
+									"    \"additionalProperties\": false,",
 									"    \"properties\": {",
 									"        \"id\": {",
 									"            \"type\": \"number\"",
@@ -206,13 +221,11 @@
 									"        }",
 									"    }",
 									"};",
-									"    const responseSchema = {",
-									"        type: \"array\",",
-									"        minItems: 2,",
-									"        maxItems: 2,",
-									"        items: itemSchema",
-									"    };",
-									"    const expectedIds = [1, 2];",
+									"    const responseSchema = { type: \"array\", minItems: 2, maxItems: 2, items: itemSchema };",
+									"    const expectedIds = [",
+									"    1,",
+									"    2",
+									"];",
 									"",
 									"    // Act",
 									"    const responseBody = pm.response.json();",
@@ -230,7 +243,171 @@
 					]
 				},
 				{
-					"name": "List products sorted by price",
+					"name": "List products with empty page",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/products?page=999&pageSize=2",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"products"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "999"
+								},
+								{
+									"key": "pageSize",
+									"value": "2"
+								}
+							]
+						}
+					},
+					"response": [],
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    // Arrange",
+									"    const expectedStatusCode = 200;",
+									"",
+									"    // Act",
+									"    const actualStatusCode = pm.response.code;",
+									"",
+									"    // Assert",
+									"    pm.expect(actualStatusCode).to.eql(expectedStatusCode);",
+									"});",
+									"",
+									"pm.test(\"Response time is less than 1000ms\", function () {",
+									"    // Arrange",
+									"    const maxResponseTime = 1000;",
+									"",
+									"    // Act",
+									"    const actualResponseTime = pm.response.responseTime;",
+									"",
+									"    // Assert",
+									"    pm.expect(actualResponseTime).to.be.below(maxResponseTime);",
+									"});",
+									"",
+									"pm.test(\"Content-Type is JSON\", function () {",
+									"    // Arrange",
+									"    const expectedContentType = \"application/json\";",
+									"",
+									"    // Act",
+									"    const actualContentType = pm.response.headers.get(\"Content-Type\");",
+									"",
+									"    // Assert",
+									"    pm.response.to.have.header(\"Content-Type\");",
+									"    pm.expect(actualContentType).to.include(expectedContentType);",
+									"});",
+									"",
+									"pm.test(\"Products out-of-range pagination returns an empty page\", function () {",
+									"    // Arrange",
+									"    const responseSchema = { type: \"array\", maxItems: 0 };",
+									"",
+									"    // Act",
+									"    const responseBody = pm.response.json();",
+									"",
+									"    // Assert",
+									"    pm.response.to.have.jsonSchema(responseSchema);",
+									"    pm.expect(responseBody).to.eql([]);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					]
+				},
+				{
+					"name": "List products with zero page size",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/products?page=1&pageSize=0",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"products"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "1"
+								},
+								{
+									"key": "pageSize",
+									"value": "0"
+								}
+							]
+						}
+					},
+					"response": [],
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    // Arrange",
+									"    const expectedStatusCode = 200;",
+									"",
+									"    // Act",
+									"    const actualStatusCode = pm.response.code;",
+									"",
+									"    // Assert",
+									"    pm.expect(actualStatusCode).to.eql(expectedStatusCode);",
+									"});",
+									"",
+									"pm.test(\"Response time is less than 1000ms\", function () {",
+									"    // Arrange",
+									"    const maxResponseTime = 1000;",
+									"",
+									"    // Act",
+									"    const actualResponseTime = pm.response.responseTime;",
+									"",
+									"    // Assert",
+									"    pm.expect(actualResponseTime).to.be.below(maxResponseTime);",
+									"});",
+									"",
+									"pm.test(\"Content-Type is JSON\", function () {",
+									"    // Arrange",
+									"    const expectedContentType = \"application/json\";",
+									"",
+									"    // Act",
+									"    const actualContentType = pm.response.headers.get(\"Content-Type\");",
+									"",
+									"    // Assert",
+									"    pm.response.to.have.header(\"Content-Type\");",
+									"    pm.expect(actualContentType).to.include(expectedContentType);",
+									"});",
+									"",
+									"pm.test(\"Products zero page size returns an empty page\", function () {",
+									"    // Arrange",
+									"    const responseSchema = { type: \"array\", maxItems: 0 };",
+									"",
+									"    // Act",
+									"    const responseBody = pm.response.json();",
+									"",
+									"    // Assert",
+									"    pm.response.to.have.jsonSchema(responseSchema);",
+									"    pm.expect(responseBody).to.eql([]);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					]
+				},
+				{
+					"name": "List products sorted by price ASC",
 					"request": {
 						"method": "GET",
 						"header": [],
@@ -294,7 +471,7 @@
 									"    pm.expect(actualContentType).to.include(expectedContentType);",
 									"});",
 									"",
-									"pm.test(\"Products are sorted by price ascending\", function () {",
+									"pm.test(\"Products are sorted by price asc\", function () {",
 									"    // Arrange",
 									"    const itemSchema = {",
 									"    \"type\": \"object\",",
@@ -305,6 +482,7 @@
 									"        \"sku\",",
 									"        \"description\"",
 									"    ],",
+									"    \"additionalProperties\": false,",
 									"    \"properties\": {",
 									"        \"id\": {",
 									"            \"type\": \"number\"",
@@ -323,11 +501,7 @@
 									"        }",
 									"    }",
 									"};",
-									"    const responseSchema = {",
-									"        type: \"array\",",
-									"        minItems: 1,",
-									"        items: itemSchema",
-									"    };",
+									"    const responseSchema = { type: \"array\", minItems: 1, items: itemSchema };",
 									"",
 									"    // Act",
 									"    const responseBody = pm.response.json();",
@@ -345,18 +519,27 @@
 					]
 				},
 				{
-					"name": "Get product by ID",
+					"name": "List products sorted by price DESC",
 					"request": {
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "{{baseUrl}}/products/3",
+							"raw": "{{baseUrl}}/products?sortOrder=DESC&sortKey=price",
 							"host": [
 								"{{baseUrl}}"
 							],
 							"path": [
-								"products",
-								"3"
+								"products"
+							],
+							"query": [
+								{
+									"key": "sortOrder",
+									"value": "DESC"
+								},
+								{
+									"key": "sortKey",
+									"value": "price"
+								}
 							]
 						}
 					},
@@ -400,9 +583,9 @@
 									"    pm.expect(actualContentType).to.include(expectedContentType);",
 									"});",
 									"",
-									"pm.test(\"Product with expected id is returned\", function () {",
+									"pm.test(\"Products are sorted by price desc\", function () {",
 									"    // Arrange",
-									"    const responseSchema = {",
+									"    const itemSchema = {",
 									"    \"type\": \"object\",",
 									"    \"required\": [",
 									"        \"id\",",
@@ -411,6 +594,7 @@
 									"        \"sku\",",
 									"        \"description\"",
 									"    ],",
+									"    \"additionalProperties\": false,",
 									"    \"properties\": {",
 									"        \"id\": {",
 									"            \"type\": \"number\"",
@@ -429,7 +613,111 @@
 									"        }",
 									"    }",
 									"};",
-									"    const expectedObject = {",
+									"    const responseSchema = { type: \"array\", minItems: 1, items: itemSchema };",
+									"",
+									"    // Act",
+									"    const responseBody = pm.response.json();",
+									"    const actualValues = responseBody.map((item) => item[\"price\"]);",
+									"    const expectedValues = [...actualValues].sort((a, b) => b - a);",
+									"",
+									"    // Assert",
+									"    pm.response.to.have.jsonSchema(responseSchema);",
+									"    pm.expect(actualValues).to.eql(expectedValues);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					]
+				},
+				{
+					"name": "Get existing product by ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/products/{{productExistingId}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"products",
+								"{{productExistingId}}"
+							]
+						}
+					},
+					"response": [],
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    // Arrange",
+									"    const expectedStatusCode = 200;",
+									"",
+									"    // Act",
+									"    const actualStatusCode = pm.response.code;",
+									"",
+									"    // Assert",
+									"    pm.expect(actualStatusCode).to.eql(expectedStatusCode);",
+									"});",
+									"",
+									"pm.test(\"Response time is less than 1000ms\", function () {",
+									"    // Arrange",
+									"    const maxResponseTime = 1000;",
+									"",
+									"    // Act",
+									"    const actualResponseTime = pm.response.responseTime;",
+									"",
+									"    // Assert",
+									"    pm.expect(actualResponseTime).to.be.below(maxResponseTime);",
+									"});",
+									"",
+									"pm.test(\"Content-Type is JSON\", function () {",
+									"    // Arrange",
+									"    const expectedContentType = \"application/json\";",
+									"",
+									"    // Act",
+									"    const actualContentType = pm.response.headers.get(\"Content-Type\");",
+									"",
+									"    // Assert",
+									"    pm.response.to.have.header(\"Content-Type\");",
+									"    pm.expect(actualContentType).to.include(expectedContentType);",
+									"});",
+									"",
+									"pm.test(\"Existing product matches strict JSON schema and fixture data\", function () {",
+									"    // Arrange",
+									"    const responseSchema = {",
+									"    \"type\": \"object\",",
+									"    \"required\": [",
+									"        \"id\",",
+									"        \"name\",",
+									"        \"price\",",
+									"        \"sku\",",
+									"        \"description\"",
+									"    ],",
+									"    \"additionalProperties\": false,",
+									"    \"properties\": {",
+									"        \"id\": {",
+									"            \"type\": \"number\"",
+									"        },",
+									"        \"name\": {",
+									"            \"type\": \"string\"",
+									"        },",
+									"        \"price\": {",
+									"            \"type\": \"number\"",
+									"        },",
+									"        \"sku\": {",
+									"            \"type\": \"number\"",
+									"        },",
+									"        \"description\": {",
+									"            \"type\": \"string\"",
+									"        }",
+									"    }",
+									"};",
+									"    const expectedId = Number(pm.collectionVariables.get(\"productExistingId\"));",
+									"    const expectedFields = {",
 									"    \"id\": 3,",
 									"    \"name\": \"apple\",",
 									"    \"price\": 30",
@@ -440,7 +728,8 @@
 									"",
 									"    // Assert",
 									"    pm.response.to.have.jsonSchema(responseSchema);",
-									"    pm.expect(responseBody).to.include(expectedObject);",
+									"    pm.expect(responseBody.id).to.eql(expectedId);",
+									"    pm.expect(responseBody).to.include(expectedFields);",
 									"});"
 								],
 								"type": "text/javascript"
@@ -449,7 +738,7 @@
 					]
 				},
 				{
-					"name": "Get missing product by ID",
+					"name": "Get missing product by numeric ID",
 					"request": {
 						"method": "GET",
 						"header": [],
@@ -492,6 +781,18 @@
 									"    pm.expect(actualResponseTime).to.be.below(maxResponseTime);",
 									"});",
 									"",
+									"pm.test(\"Content-Type is JSON\", function () {",
+									"    // Arrange",
+									"    const expectedContentType = \"application/json\";",
+									"",
+									"    // Act",
+									"    const actualContentType = pm.response.headers.get(\"Content-Type\");",
+									"",
+									"    // Assert",
+									"    pm.response.to.have.header(\"Content-Type\");",
+									"    pm.expect(actualContentType).to.include(expectedContentType);",
+									"});",
+									"",
 									"pm.test(\"Missing product response is an empty JSON object\", function () {",
 									"    // Arrange",
 									"    const responseSchema = { type: \"object\", maxProperties: 0 };",
@@ -510,32 +811,19 @@
 					]
 				},
 				{
-					"name": "Create product",
+					"name": "Get product by invalid ID type",
 					"request": {
-						"method": "POST",
-						"header": [
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							}
-						],
+						"method": "GET",
+						"header": [],
 						"url": {
-							"raw": "{{baseUrl}}/products",
+							"raw": "{{baseUrl}}/products/abc",
 							"host": [
 								"{{baseUrl}}"
 							],
 							"path": [
-								"products"
+								"products",
+								"abc"
 							]
-						},
-						"body": {
-							"mode": "raw",
-							"raw": "{\n    \"name\": \"orange\",\n    \"price\": 8,\n    \"sku\": 123321123,\n    \"description\": \"wouh\"\n}",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
 						}
 					},
 					"response": [],
@@ -544,9 +832,9 @@
 							"listen": "test",
 							"script": {
 								"exec": [
-									"pm.test(\"Status code is 201\", function () {",
+									"pm.test(\"Status code is 404\", function () {",
 									"    // Arrange",
-									"    const expectedStatusCode = 201;",
+									"    const expectedStatusCode = 404;",
 									"",
 									"    // Act",
 									"    const actualStatusCode = pm.response.code;",
@@ -578,49 +866,89 @@
 									"    pm.expect(actualContentType).to.include(expectedContentType);",
 									"});",
 									"",
-									"pm.test(\"Product is created with request data and generated id\", function () {",
+									"pm.test(\"Missing product response is an empty JSON object\", function () {",
 									"    // Arrange",
-									"    const responseSchema = {",
-									"    \"type\": \"object\",",
-									"    \"required\": [",
-									"        \"id\",",
-									"        \"name\",",
-									"        \"price\",",
-									"        \"sku\",",
-									"        \"description\"",
-									"    ],",
-									"    \"properties\": {",
-									"        \"id\": {",
-									"            \"type\": \"number\"",
-									"        },",
-									"        \"name\": {",
-									"            \"type\": \"string\"",
-									"        },",
-									"        \"price\": {",
-									"            \"type\": \"number\"",
-									"        },",
-									"        \"sku\": {",
-									"            \"type\": \"number\"",
-									"        },",
-									"        \"description\": {",
-									"            \"type\": \"string\"",
-									"        }",
-									"    }",
-									"};",
-									"    const expectedObject = {",
-									"    \"name\": \"orange\",",
-									"    \"price\": 8,",
-									"    \"sku\": 123321123,",
-									"    \"description\": \"wouh\"",
-									"};",
+									"    const responseSchema = { type: \"object\", maxProperties: 0 };",
 									"",
 									"    // Act",
 									"    const responseBody = pm.response.json();",
 									"",
 									"    // Assert",
 									"    pm.response.to.have.jsonSchema(responseSchema);",
-									"    pm.expect(responseBody).to.include(expectedObject);",
-									"    pm.expect(responseBody.id).to.be.a(\"number\");",
+									"    pm.expect(responseBody).to.eql({});",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					]
+				},
+				{
+					"name": "Create product with missing required fields",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/products",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"products"
+							]
+						},
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"price\": 99,\n    \"sku\": 111,\n    \"description\": \"name is missing\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						}
+					},
+					"response": [],
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 400\", function () {",
+									"    // Arrange",
+									"    const expectedStatusCode = 400;",
+									"",
+									"    // Act",
+									"    const actualStatusCode = pm.response.code;",
+									"",
+									"    // Assert",
+									"    pm.expect(actualStatusCode).to.eql(expectedStatusCode);",
+									"});",
+									"",
+									"pm.test(\"Response time is less than 1000ms\", function () {",
+									"    // Arrange",
+									"    const maxResponseTime = 1000;",
+									"",
+									"    // Act",
+									"    const actualResponseTime = pm.response.responseTime;",
+									"",
+									"    // Assert",
+									"    pm.expect(actualResponseTime).to.be.below(maxResponseTime);",
+									"});",
+									"",
+									"pm.test(\"Missing required product fields are rejected\", function () {",
+									"    // Arrange",
+									"    const expectedBody = \"\";",
+									"",
+									"    // Act",
+									"    const responseText = pm.response.text();",
+									"",
+									"    // Assert",
+									"    pm.expect(responseText).to.eql(expectedBody);",
 									"});"
 								],
 								"type": "text/javascript"
@@ -702,7 +1030,236 @@
 					]
 				},
 				{
-					"name": "Update product",
+					"name": "Create product",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/products",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"products"
+							]
+						},
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"orange\",\n    \"price\": 8,\n    \"sku\": 123321123,\n    \"description\": \"wouh\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						}
+					},
+					"response": [],
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 201\", function () {",
+									"    // Arrange",
+									"    const expectedStatusCode = 201;",
+									"",
+									"    // Act",
+									"    const actualStatusCode = pm.response.code;",
+									"",
+									"    // Assert",
+									"    pm.expect(actualStatusCode).to.eql(expectedStatusCode);",
+									"});",
+									"",
+									"pm.test(\"Response time is less than 1000ms\", function () {",
+									"    // Arrange",
+									"    const maxResponseTime = 1000;",
+									"",
+									"    // Act",
+									"    const actualResponseTime = pm.response.responseTime;",
+									"",
+									"    // Assert",
+									"    pm.expect(actualResponseTime).to.be.below(maxResponseTime);",
+									"});",
+									"",
+									"pm.test(\"Content-Type is JSON\", function () {",
+									"    // Arrange",
+									"    const expectedContentType = \"application/json\";",
+									"",
+									"    // Act",
+									"    const actualContentType = pm.response.headers.get(\"Content-Type\");",
+									"",
+									"    // Assert",
+									"    pm.response.to.have.header(\"Content-Type\");",
+									"    pm.expect(actualContentType).to.include(expectedContentType);",
+									"});",
+									"",
+									"pm.test(\"Product is created and id is stored for lifecycle checks\", function () {",
+									"    // Arrange",
+									"    const responseSchema = {",
+									"    \"type\": \"object\",",
+									"    \"required\": [",
+									"        \"id\",",
+									"        \"name\",",
+									"        \"price\",",
+									"        \"sku\",",
+									"        \"description\"",
+									"    ],",
+									"    \"additionalProperties\": false,",
+									"    \"properties\": {",
+									"        \"id\": {",
+									"            \"type\": \"number\"",
+									"        },",
+									"        \"name\": {",
+									"            \"type\": \"string\"",
+									"        },",
+									"        \"price\": {",
+									"            \"type\": \"number\"",
+									"        },",
+									"        \"sku\": {",
+									"            \"type\": \"number\"",
+									"        },",
+									"        \"description\": {",
+									"            \"type\": \"string\"",
+									"        }",
+									"    }",
+									"};",
+									"    const expectedFields = {",
+									"    \"name\": \"orange\",",
+									"    \"price\": 8,",
+									"    \"sku\": 123321123,",
+									"    \"description\": \"wouh\"",
+									"};",
+									"",
+									"    // Act",
+									"    const responseBody = pm.response.json();",
+									"",
+									"    // Assert",
+									"    pm.response.to.have.jsonSchema(responseSchema);",
+									"    pm.expect(responseBody).to.include(expectedFields);",
+									"    pm.expect(responseBody.id).to.be.a(\"number\");",
+									"    pm.collectionVariables.set(\"productCreatedId\", responseBody.id);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					]
+				},
+				{
+					"name": "Get created product by ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/products/{{productCreatedId}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"products",
+								"{{productCreatedId}}"
+							]
+						}
+					},
+					"response": [],
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    // Arrange",
+									"    const expectedStatusCode = 200;",
+									"",
+									"    // Act",
+									"    const actualStatusCode = pm.response.code;",
+									"",
+									"    // Assert",
+									"    pm.expect(actualStatusCode).to.eql(expectedStatusCode);",
+									"});",
+									"",
+									"pm.test(\"Response time is less than 1000ms\", function () {",
+									"    // Arrange",
+									"    const maxResponseTime = 1000;",
+									"",
+									"    // Act",
+									"    const actualResponseTime = pm.response.responseTime;",
+									"",
+									"    // Assert",
+									"    pm.expect(actualResponseTime).to.be.below(maxResponseTime);",
+									"});",
+									"",
+									"pm.test(\"Content-Type is JSON\", function () {",
+									"    // Arrange",
+									"    const expectedContentType = \"application/json\";",
+									"",
+									"    // Act",
+									"    const actualContentType = pm.response.headers.get(\"Content-Type\");",
+									"",
+									"    // Assert",
+									"    pm.response.to.have.header(\"Content-Type\");",
+									"    pm.expect(actualContentType).to.include(expectedContentType);",
+									"});",
+									"",
+									"pm.test(\"Created product can be retrieved\", function () {",
+									"    // Arrange",
+									"    const responseSchema = {",
+									"    \"type\": \"object\",",
+									"    \"required\": [",
+									"        \"id\",",
+									"        \"name\",",
+									"        \"price\",",
+									"        \"sku\",",
+									"        \"description\"",
+									"    ],",
+									"    \"additionalProperties\": false,",
+									"    \"properties\": {",
+									"        \"id\": {",
+									"            \"type\": \"number\"",
+									"        },",
+									"        \"name\": {",
+									"            \"type\": \"string\"",
+									"        },",
+									"        \"price\": {",
+									"            \"type\": \"number\"",
+									"        },",
+									"        \"sku\": {",
+									"            \"type\": \"number\"",
+									"        },",
+									"        \"description\": {",
+									"            \"type\": \"string\"",
+									"        }",
+									"    }",
+									"};",
+									"    const expectedId = Number(pm.collectionVariables.get(\"productCreatedId\"));",
+									"    const expectedFields = {",
+									"    \"name\": \"orange\",",
+									"    \"price\": 8,",
+									"    \"sku\": 123321123,",
+									"    \"description\": \"wouh\"",
+									"};",
+									"",
+									"    // Act",
+									"    const responseBody = pm.response.json();",
+									"",
+									"    // Assert",
+									"    pm.response.to.have.jsonSchema(responseSchema);",
+									"    pm.expect(responseBody.id).to.eql(expectedId);",
+									"    pm.expect(responseBody).to.include(expectedFields);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					]
+				},
+				{
+					"name": "Update created product",
 					"request": {
 						"method": "PUT",
 						"header": [
@@ -722,7 +1279,7 @@
 						},
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"id\": 4,\n    \"name\": \"banana\",\n    \"price\": 155,\n    \"sku\": 123321123,\n    \"description\": \"changed description\"\n}",
+							"raw": "{\n    \"id\": {{productCreatedId}},\n    \"name\": \"banana\",\n    \"price\": 155,\n    \"sku\": 123321123,\n    \"description\": \"changed description\"\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -770,7 +1327,7 @@
 									"    pm.expect(actualContentType).to.include(expectedContentType);",
 									"});",
 									"",
-									"pm.test(\"Product is updated\", function () {",
+									"pm.test(\"Created product is updated\", function () {",
 									"    // Arrange",
 									"    const responseSchema = {",
 									"    \"type\": \"object\",",
@@ -781,6 +1338,7 @@
 									"        \"sku\",",
 									"        \"description\"",
 									"    ],",
+									"    \"additionalProperties\": false,",
 									"    \"properties\": {",
 									"        \"id\": {",
 									"            \"type\": \"number\"",
@@ -799,8 +1357,8 @@
 									"        }",
 									"    }",
 									"};",
-									"    const expectedObject = {",
-									"    \"id\": 4,",
+									"    const expectedId = Number(pm.collectionVariables.get(\"productCreatedId\"));",
+									"    const expectedFields = {",
 									"    \"name\": \"banana\",",
 									"    \"price\": 155,",
 									"    \"sku\": 123321123,",
@@ -812,7 +1370,8 @@
 									"",
 									"    // Assert",
 									"    pm.response.to.have.jsonSchema(responseSchema);",
-									"    pm.expect(responseBody).to.include(expectedObject);",
+									"    pm.expect(responseBody.id).to.eql(expectedId);",
+									"    pm.expect(responseBody).to.include(expectedFields);",
 									"});"
 								],
 								"type": "text/javascript"
@@ -821,18 +1380,18 @@
 					]
 				},
 				{
-					"name": "Remove product by ID",
+					"name": "Get updated product by ID",
 					"request": {
-						"method": "DELETE",
+						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "{{baseUrl}}/products/4",
+							"raw": "{{baseUrl}}/products/{{productCreatedId}}",
 							"host": [
 								"{{baseUrl}}"
 							],
 							"path": [
 								"products",
-								"4"
+								"{{productCreatedId}}"
 							]
 						}
 					},
@@ -876,7 +1435,7 @@
 									"    pm.expect(actualContentType).to.include(expectedContentType);",
 									"});",
 									"",
-									"pm.test(\"Deleted product is returned\", function () {",
+									"pm.test(\"Updated product can be retrieved\", function () {",
 									"    // Arrange",
 									"    const responseSchema = {",
 									"    \"type\": \"object\",",
@@ -887,6 +1446,7 @@
 									"        \"sku\",",
 									"        \"description\"",
 									"    ],",
+									"    \"additionalProperties\": false,",
 									"    \"properties\": {",
 									"        \"id\": {",
 									"            \"type\": \"number\"",
@@ -905,7 +1465,13 @@
 									"        }",
 									"    }",
 									"};",
-									"    const expectedId = 4;",
+									"    const expectedId = Number(pm.collectionVariables.get(\"productCreatedId\"));",
+									"    const expectedFields = {",
+									"    \"name\": \"banana\",",
+									"    \"price\": 155,",
+									"    \"sku\": 123321123,",
+									"    \"description\": \"changed description\"",
+									"};",
 									"",
 									"    // Act",
 									"    const responseBody = pm.response.json();",
@@ -913,6 +1479,184 @@
 									"    // Assert",
 									"    pm.response.to.have.jsonSchema(responseSchema);",
 									"    pm.expect(responseBody.id).to.eql(expectedId);",
+									"    pm.expect(responseBody).to.include(expectedFields);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					]
+				},
+				{
+					"name": "Remove created product by ID",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/products/{{productCreatedId}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"products",
+								"{{productCreatedId}}"
+							]
+						}
+					},
+					"response": [],
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    // Arrange",
+									"    const expectedStatusCode = 200;",
+									"",
+									"    // Act",
+									"    const actualStatusCode = pm.response.code;",
+									"",
+									"    // Assert",
+									"    pm.expect(actualStatusCode).to.eql(expectedStatusCode);",
+									"});",
+									"",
+									"pm.test(\"Response time is less than 1000ms\", function () {",
+									"    // Arrange",
+									"    const maxResponseTime = 1000;",
+									"",
+									"    // Act",
+									"    const actualResponseTime = pm.response.responseTime;",
+									"",
+									"    // Assert",
+									"    pm.expect(actualResponseTime).to.be.below(maxResponseTime);",
+									"});",
+									"",
+									"pm.test(\"Content-Type is JSON\", function () {",
+									"    // Arrange",
+									"    const expectedContentType = \"application/json\";",
+									"",
+									"    // Act",
+									"    const actualContentType = pm.response.headers.get(\"Content-Type\");",
+									"",
+									"    // Assert",
+									"    pm.response.to.have.header(\"Content-Type\");",
+									"    pm.expect(actualContentType).to.include(expectedContentType);",
+									"});",
+									"",
+									"pm.test(\"Created product is deleted\", function () {",
+									"    // Arrange",
+									"    const responseSchema = {",
+									"    \"type\": \"object\",",
+									"    \"required\": [",
+									"        \"id\",",
+									"        \"name\",",
+									"        \"price\",",
+									"        \"sku\",",
+									"        \"description\"",
+									"    ],",
+									"    \"additionalProperties\": false,",
+									"    \"properties\": {",
+									"        \"id\": {",
+									"            \"type\": \"number\"",
+									"        },",
+									"        \"name\": {",
+									"            \"type\": \"string\"",
+									"        },",
+									"        \"price\": {",
+									"            \"type\": \"number\"",
+									"        },",
+									"        \"sku\": {",
+									"            \"type\": \"number\"",
+									"        },",
+									"        \"description\": {",
+									"            \"type\": \"string\"",
+									"        }",
+									"    }",
+									"};",
+									"    const expectedId = Number(pm.collectionVariables.get(\"productCreatedId\"));",
+									"",
+									"    // Act",
+									"    const responseBody = pm.response.json();",
+									"",
+									"    // Assert",
+									"    pm.response.to.have.jsonSchema(responseSchema);",
+									"    pm.expect(responseBody.id).to.eql(expectedId);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					]
+				},
+				{
+					"name": "Get deleted product by ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/products/{{productCreatedId}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"products",
+								"{{productCreatedId}}"
+							]
+						}
+					},
+					"response": [],
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 404\", function () {",
+									"    // Arrange",
+									"    const expectedStatusCode = 404;",
+									"",
+									"    // Act",
+									"    const actualStatusCode = pm.response.code;",
+									"",
+									"    // Assert",
+									"    pm.expect(actualStatusCode).to.eql(expectedStatusCode);",
+									"});",
+									"",
+									"pm.test(\"Response time is less than 1000ms\", function () {",
+									"    // Arrange",
+									"    const maxResponseTime = 1000;",
+									"",
+									"    // Act",
+									"    const actualResponseTime = pm.response.responseTime;",
+									"",
+									"    // Assert",
+									"    pm.expect(actualResponseTime).to.be.below(maxResponseTime);",
+									"});",
+									"",
+									"pm.test(\"Content-Type is JSON\", function () {",
+									"    // Arrange",
+									"    const expectedContentType = \"application/json\";",
+									"",
+									"    // Act",
+									"    const actualContentType = pm.response.headers.get(\"Content-Type\");",
+									"",
+									"    // Assert",
+									"    pm.response.to.have.header(\"Content-Type\");",
+									"    pm.expect(actualContentType).to.include(expectedContentType);",
+									"});",
+									"",
+									"pm.test(\"Deleted product cannot be retrieved\", function () {",
+									"    // Arrange",
+									"    const responseSchema = { type: \"object\", maxProperties: 0 };",
+									"    const deletedId = Number(pm.collectionVariables.get(\"productCreatedId\"));",
+									"",
+									"    // Act",
+									"    const responseBody = pm.response.json();",
+									"",
+									"    // Assert",
+									"    pm.response.to.have.jsonSchema(responseSchema);",
+									"    pm.expect(deletedId).to.be.a(\"number\");",
+									"    pm.expect(responseBody).to.eql({});",
+									"    pm.collectionVariables.unset(\"productCreatedId\");",
 									"});"
 								],
 								"type": "text/javascript"
@@ -980,7 +1724,7 @@
 									"    pm.expect(actualContentType).to.include(expectedContentType);",
 									"});",
 									"",
-									"pm.test(\"Orders list matches JSON schema\", function () {",
+									"pm.test(\"Orders list matches strict JSON schema\", function () {",
 									"    // Arrange",
 									"    const itemSchema = {",
 									"    \"type\": \"object\",",
@@ -989,6 +1733,7 @@
 									"        \"name\",",
 									"        \"sku\"",
 									"    ],",
+									"    \"additionalProperties\": false,",
 									"    \"properties\": {",
 									"        \"id\": {",
 									"            \"type\": \"number\"",
@@ -1001,11 +1746,7 @@
 									"        }",
 									"    }",
 									"};",
-									"    const responseSchema = {",
-									"        type: \"array\",",
-									"        minItems: 1,",
-									"        items: itemSchema",
-									"    };",
+									"    const responseSchema = { type: \"array\", minItems: 1, items: itemSchema };",
 									"",
 									"    // Act",
 									"    const responseBody = pm.response.json();",
@@ -1013,6 +1754,23 @@
 									"    // Assert",
 									"    pm.response.to.have.jsonSchema(responseSchema);",
 									"    pm.expect(responseBody).to.be.an(\"array\").that.is.not.empty;",
+									"});",
+									"",
+									"pm.test(\"Existing order id is stored for dependent requests\", function () {",
+									"    // Arrange",
+									"    const fixture = {",
+									"    \"id\": 3,",
+									"    \"name\": \"order2\",",
+									"    \"sku\": 999921312423312",
+									"};",
+									"",
+									"    // Act",
+									"    const responseBody = pm.response.json();",
+									"    const existingItem = responseBody.find((item) => item.id === fixture.id);",
+									"",
+									"    // Assert",
+									"    pm.expect(existingItem).to.include(fixture);",
+									"    pm.collectionVariables.set(\"orderExistingId\", existingItem.id);",
 									"});"
 								],
 								"type": "text/javascript"
@@ -1094,6 +1852,7 @@
 									"        \"name\",",
 									"        \"sku\"",
 									"    ],",
+									"    \"additionalProperties\": false,",
 									"    \"properties\": {",
 									"        \"id\": {",
 									"            \"type\": \"number\"",
@@ -1106,13 +1865,11 @@
 									"        }",
 									"    }",
 									"};",
-									"    const responseSchema = {",
-									"        type: \"array\",",
-									"        minItems: 2,",
-									"        maxItems: 2,",
-									"        items: itemSchema",
-									"    };",
-									"    const expectedIds = [1, 2];",
+									"    const responseSchema = { type: \"array\", minItems: 2, maxItems: 2, items: itemSchema };",
+									"    const expectedIds = [",
+									"    1,",
+									"    2",
+									"];",
 									"",
 									"    // Act",
 									"    const responseBody = pm.response.json();",
@@ -1130,7 +1887,171 @@
 					]
 				},
 				{
-					"name": "List orders sorted by sku",
+					"name": "List orders with empty page",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/orders?page=999&pageSize=2",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"orders"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "999"
+								},
+								{
+									"key": "pageSize",
+									"value": "2"
+								}
+							]
+						}
+					},
+					"response": [],
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    // Arrange",
+									"    const expectedStatusCode = 200;",
+									"",
+									"    // Act",
+									"    const actualStatusCode = pm.response.code;",
+									"",
+									"    // Assert",
+									"    pm.expect(actualStatusCode).to.eql(expectedStatusCode);",
+									"});",
+									"",
+									"pm.test(\"Response time is less than 1000ms\", function () {",
+									"    // Arrange",
+									"    const maxResponseTime = 1000;",
+									"",
+									"    // Act",
+									"    const actualResponseTime = pm.response.responseTime;",
+									"",
+									"    // Assert",
+									"    pm.expect(actualResponseTime).to.be.below(maxResponseTime);",
+									"});",
+									"",
+									"pm.test(\"Content-Type is JSON\", function () {",
+									"    // Arrange",
+									"    const expectedContentType = \"application/json\";",
+									"",
+									"    // Act",
+									"    const actualContentType = pm.response.headers.get(\"Content-Type\");",
+									"",
+									"    // Assert",
+									"    pm.response.to.have.header(\"Content-Type\");",
+									"    pm.expect(actualContentType).to.include(expectedContentType);",
+									"});",
+									"",
+									"pm.test(\"Orders out-of-range pagination returns an empty page\", function () {",
+									"    // Arrange",
+									"    const responseSchema = { type: \"array\", maxItems: 0 };",
+									"",
+									"    // Act",
+									"    const responseBody = pm.response.json();",
+									"",
+									"    // Assert",
+									"    pm.response.to.have.jsonSchema(responseSchema);",
+									"    pm.expect(responseBody).to.eql([]);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					]
+				},
+				{
+					"name": "List orders with zero page size",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/orders?page=1&pageSize=0",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"orders"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "1"
+								},
+								{
+									"key": "pageSize",
+									"value": "0"
+								}
+							]
+						}
+					},
+					"response": [],
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    // Arrange",
+									"    const expectedStatusCode = 200;",
+									"",
+									"    // Act",
+									"    const actualStatusCode = pm.response.code;",
+									"",
+									"    // Assert",
+									"    pm.expect(actualStatusCode).to.eql(expectedStatusCode);",
+									"});",
+									"",
+									"pm.test(\"Response time is less than 1000ms\", function () {",
+									"    // Arrange",
+									"    const maxResponseTime = 1000;",
+									"",
+									"    // Act",
+									"    const actualResponseTime = pm.response.responseTime;",
+									"",
+									"    // Assert",
+									"    pm.expect(actualResponseTime).to.be.below(maxResponseTime);",
+									"});",
+									"",
+									"pm.test(\"Content-Type is JSON\", function () {",
+									"    // Arrange",
+									"    const expectedContentType = \"application/json\";",
+									"",
+									"    // Act",
+									"    const actualContentType = pm.response.headers.get(\"Content-Type\");",
+									"",
+									"    // Assert",
+									"    pm.response.to.have.header(\"Content-Type\");",
+									"    pm.expect(actualContentType).to.include(expectedContentType);",
+									"});",
+									"",
+									"pm.test(\"Orders zero page size returns an empty page\", function () {",
+									"    // Arrange",
+									"    const responseSchema = { type: \"array\", maxItems: 0 };",
+									"",
+									"    // Act",
+									"    const responseBody = pm.response.json();",
+									"",
+									"    // Assert",
+									"    pm.response.to.have.jsonSchema(responseSchema);",
+									"    pm.expect(responseBody).to.eql([]);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					]
+				},
+				{
+					"name": "List orders sorted by sku ASC",
 					"request": {
 						"method": "GET",
 						"header": [],
@@ -1194,7 +2115,7 @@
 									"    pm.expect(actualContentType).to.include(expectedContentType);",
 									"});",
 									"",
-									"pm.test(\"Orders are sorted by sku ascending\", function () {",
+									"pm.test(\"Orders are sorted by sku asc\", function () {",
 									"    // Arrange",
 									"    const itemSchema = {",
 									"    \"type\": \"object\",",
@@ -1203,6 +2124,7 @@
 									"        \"name\",",
 									"        \"sku\"",
 									"    ],",
+									"    \"additionalProperties\": false,",
 									"    \"properties\": {",
 									"        \"id\": {",
 									"            \"type\": \"number\"",
@@ -1215,11 +2137,7 @@
 									"        }",
 									"    }",
 									"};",
-									"    const responseSchema = {",
-									"        type: \"array\",",
-									"        minItems: 1,",
-									"        items: itemSchema",
-									"    };",
+									"    const responseSchema = { type: \"array\", minItems: 1, items: itemSchema };",
 									"",
 									"    // Act",
 									"    const responseBody = pm.response.json();",
@@ -1237,18 +2155,27 @@
 					]
 				},
 				{
-					"name": "Get order by ID",
+					"name": "List orders sorted by sku DESC",
 					"request": {
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "{{baseUrl}}/orders/3",
+							"raw": "{{baseUrl}}/orders?sortOrder=DESC&sortKey=sku",
 							"host": [
 								"{{baseUrl}}"
 							],
 							"path": [
-								"orders",
-								"3"
+								"orders"
+							],
+							"query": [
+								{
+									"key": "sortOrder",
+									"value": "DESC"
+								},
+								{
+									"key": "sortKey",
+									"value": "sku"
+								}
 							]
 						}
 					},
@@ -1292,15 +2219,16 @@
 									"    pm.expect(actualContentType).to.include(expectedContentType);",
 									"});",
 									"",
-									"pm.test(\"Order with expected id is returned\", function () {",
+									"pm.test(\"Orders are sorted by sku desc\", function () {",
 									"    // Arrange",
-									"    const responseSchema = {",
+									"    const itemSchema = {",
 									"    \"type\": \"object\",",
 									"    \"required\": [",
 									"        \"id\",",
 									"        \"name\",",
 									"        \"sku\"",
 									"    ],",
+									"    \"additionalProperties\": false,",
 									"    \"properties\": {",
 									"        \"id\": {",
 									"            \"type\": \"number\"",
@@ -1313,7 +2241,103 @@
 									"        }",
 									"    }",
 									"};",
-									"    const expectedObject = {",
+									"    const responseSchema = { type: \"array\", minItems: 1, items: itemSchema };",
+									"",
+									"    // Act",
+									"    const responseBody = pm.response.json();",
+									"    const actualValues = responseBody.map((item) => item[\"sku\"]);",
+									"    const expectedValues = [...actualValues].sort((a, b) => b - a);",
+									"",
+									"    // Assert",
+									"    pm.response.to.have.jsonSchema(responseSchema);",
+									"    pm.expect(actualValues).to.eql(expectedValues);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					]
+				},
+				{
+					"name": "Get existing order by ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/orders/{{orderExistingId}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"orders",
+								"{{orderExistingId}}"
+							]
+						}
+					},
+					"response": [],
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    // Arrange",
+									"    const expectedStatusCode = 200;",
+									"",
+									"    // Act",
+									"    const actualStatusCode = pm.response.code;",
+									"",
+									"    // Assert",
+									"    pm.expect(actualStatusCode).to.eql(expectedStatusCode);",
+									"});",
+									"",
+									"pm.test(\"Response time is less than 1000ms\", function () {",
+									"    // Arrange",
+									"    const maxResponseTime = 1000;",
+									"",
+									"    // Act",
+									"    const actualResponseTime = pm.response.responseTime;",
+									"",
+									"    // Assert",
+									"    pm.expect(actualResponseTime).to.be.below(maxResponseTime);",
+									"});",
+									"",
+									"pm.test(\"Content-Type is JSON\", function () {",
+									"    // Arrange",
+									"    const expectedContentType = \"application/json\";",
+									"",
+									"    // Act",
+									"    const actualContentType = pm.response.headers.get(\"Content-Type\");",
+									"",
+									"    // Assert",
+									"    pm.response.to.have.header(\"Content-Type\");",
+									"    pm.expect(actualContentType).to.include(expectedContentType);",
+									"});",
+									"",
+									"pm.test(\"Existing order matches strict JSON schema and fixture data\", function () {",
+									"    // Arrange",
+									"    const responseSchema = {",
+									"    \"type\": \"object\",",
+									"    \"required\": [",
+									"        \"id\",",
+									"        \"name\",",
+									"        \"sku\"",
+									"    ],",
+									"    \"additionalProperties\": false,",
+									"    \"properties\": {",
+									"        \"id\": {",
+									"            \"type\": \"number\"",
+									"        },",
+									"        \"name\": {",
+									"            \"type\": \"string\"",
+									"        },",
+									"        \"sku\": {",
+									"            \"type\": \"number\"",
+									"        }",
+									"    }",
+									"};",
+									"    const expectedId = Number(pm.collectionVariables.get(\"orderExistingId\"));",
+									"    const expectedFields = {",
 									"    \"id\": 3,",
 									"    \"name\": \"order2\",",
 									"    \"sku\": 999921312423312",
@@ -1324,7 +2348,8 @@
 									"",
 									"    // Assert",
 									"    pm.response.to.have.jsonSchema(responseSchema);",
-									"    pm.expect(responseBody).to.include(expectedObject);",
+									"    pm.expect(responseBody.id).to.eql(expectedId);",
+									"    pm.expect(responseBody).to.include(expectedFields);",
 									"});"
 								],
 								"type": "text/javascript"
@@ -1333,7 +2358,7 @@
 					]
 				},
 				{
-					"name": "Get missing order by ID",
+					"name": "Get missing order by numeric ID",
 					"request": {
 						"method": "GET",
 						"header": [],
@@ -1376,6 +2401,18 @@
 									"    pm.expect(actualResponseTime).to.be.below(maxResponseTime);",
 									"});",
 									"",
+									"pm.test(\"Content-Type is JSON\", function () {",
+									"    // Arrange",
+									"    const expectedContentType = \"application/json\";",
+									"",
+									"    // Act",
+									"    const actualContentType = pm.response.headers.get(\"Content-Type\");",
+									"",
+									"    // Assert",
+									"    pm.response.to.have.header(\"Content-Type\");",
+									"    pm.expect(actualContentType).to.include(expectedContentType);",
+									"});",
+									"",
 									"pm.test(\"Missing order response is an empty JSON object\", function () {",
 									"    // Arrange",
 									"    const responseSchema = { type: \"object\", maxProperties: 0 };",
@@ -1394,32 +2431,19 @@
 					]
 				},
 				{
-					"name": "Create order",
+					"name": "Get order by invalid ID type",
 					"request": {
-						"method": "POST",
-						"header": [
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							}
-						],
+						"method": "GET",
+						"header": [],
 						"url": {
-							"raw": "{{baseUrl}}/orders",
+							"raw": "{{baseUrl}}/orders/abc",
 							"host": [
 								"{{baseUrl}}"
 							],
 							"path": [
-								"orders"
+								"orders",
+								"abc"
 							]
-						},
-						"body": {
-							"mode": "raw",
-							"raw": "{\n    \"name\": \"order5\",\n    \"sku\": 123425445656765\n}",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
 						}
 					},
 					"response": [],
@@ -1428,9 +2452,9 @@
 							"listen": "test",
 							"script": {
 								"exec": [
-									"pm.test(\"Status code is 201\", function () {",
+									"pm.test(\"Status code is 404\", function () {",
 									"    // Arrange",
-									"    const expectedStatusCode = 201;",
+									"    const expectedStatusCode = 404;",
 									"",
 									"    // Act",
 									"    const actualStatusCode = pm.response.code;",
@@ -1462,39 +2486,89 @@
 									"    pm.expect(actualContentType).to.include(expectedContentType);",
 									"});",
 									"",
-									"pm.test(\"Order is created with request data and generated id\", function () {",
+									"pm.test(\"Missing order response is an empty JSON object\", function () {",
 									"    // Arrange",
-									"    const responseSchema = {",
-									"    \"type\": \"object\",",
-									"    \"required\": [",
-									"        \"id\",",
-									"        \"name\",",
-									"        \"sku\"",
-									"    ],",
-									"    \"properties\": {",
-									"        \"id\": {",
-									"            \"type\": \"number\"",
-									"        },",
-									"        \"name\": {",
-									"            \"type\": \"string\"",
-									"        },",
-									"        \"sku\": {",
-									"            \"type\": \"number\"",
-									"        }",
-									"    }",
-									"};",
-									"    const expectedObject = {",
-									"    \"name\": \"order5\",",
-									"    \"sku\": 123425445656765",
-									"};",
+									"    const responseSchema = { type: \"object\", maxProperties: 0 };",
 									"",
 									"    // Act",
 									"    const responseBody = pm.response.json();",
 									"",
 									"    // Assert",
 									"    pm.response.to.have.jsonSchema(responseSchema);",
-									"    pm.expect(responseBody).to.include(expectedObject);",
-									"    pm.expect(responseBody.id).to.be.a(\"number\");",
+									"    pm.expect(responseBody).to.eql({});",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					]
+				},
+				{
+					"name": "Create order with missing required fields",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/orders",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"orders"
+							]
+						},
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"sku\": 777777777777\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						}
+					},
+					"response": [],
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 400\", function () {",
+									"    // Arrange",
+									"    const expectedStatusCode = 400;",
+									"",
+									"    // Act",
+									"    const actualStatusCode = pm.response.code;",
+									"",
+									"    // Assert",
+									"    pm.expect(actualStatusCode).to.eql(expectedStatusCode);",
+									"});",
+									"",
+									"pm.test(\"Response time is less than 1000ms\", function () {",
+									"    // Arrange",
+									"    const maxResponseTime = 1000;",
+									"",
+									"    // Act",
+									"    const actualResponseTime = pm.response.responseTime;",
+									"",
+									"    // Assert",
+									"    pm.expect(actualResponseTime).to.be.below(maxResponseTime);",
+									"});",
+									"",
+									"pm.test(\"Missing required order fields are rejected\", function () {",
+									"    // Arrange",
+									"    const expectedBody = \"\";",
+									"",
+									"    // Act",
+									"    const responseText = pm.response.text();",
+									"",
+									"    // Assert",
+									"    pm.expect(responseText).to.eql(expectedBody);",
 									"});"
 								],
 								"type": "text/javascript"
@@ -1576,7 +2650,216 @@
 					]
 				},
 				{
-					"name": "Update order",
+					"name": "Create order",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/orders",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"orders"
+							]
+						},
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"order5\",\n    \"sku\": 123425445656765\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						}
+					},
+					"response": [],
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 201\", function () {",
+									"    // Arrange",
+									"    const expectedStatusCode = 201;",
+									"",
+									"    // Act",
+									"    const actualStatusCode = pm.response.code;",
+									"",
+									"    // Assert",
+									"    pm.expect(actualStatusCode).to.eql(expectedStatusCode);",
+									"});",
+									"",
+									"pm.test(\"Response time is less than 1000ms\", function () {",
+									"    // Arrange",
+									"    const maxResponseTime = 1000;",
+									"",
+									"    // Act",
+									"    const actualResponseTime = pm.response.responseTime;",
+									"",
+									"    // Assert",
+									"    pm.expect(actualResponseTime).to.be.below(maxResponseTime);",
+									"});",
+									"",
+									"pm.test(\"Content-Type is JSON\", function () {",
+									"    // Arrange",
+									"    const expectedContentType = \"application/json\";",
+									"",
+									"    // Act",
+									"    const actualContentType = pm.response.headers.get(\"Content-Type\");",
+									"",
+									"    // Assert",
+									"    pm.response.to.have.header(\"Content-Type\");",
+									"    pm.expect(actualContentType).to.include(expectedContentType);",
+									"});",
+									"",
+									"pm.test(\"Order is created and id is stored for lifecycle checks\", function () {",
+									"    // Arrange",
+									"    const responseSchema = {",
+									"    \"type\": \"object\",",
+									"    \"required\": [",
+									"        \"id\",",
+									"        \"name\",",
+									"        \"sku\"",
+									"    ],",
+									"    \"additionalProperties\": false,",
+									"    \"properties\": {",
+									"        \"id\": {",
+									"            \"type\": \"number\"",
+									"        },",
+									"        \"name\": {",
+									"            \"type\": \"string\"",
+									"        },",
+									"        \"sku\": {",
+									"            \"type\": \"number\"",
+									"        }",
+									"    }",
+									"};",
+									"    const expectedFields = {",
+									"    \"name\": \"order5\",",
+									"    \"sku\": 123425445656765",
+									"};",
+									"",
+									"    // Act",
+									"    const responseBody = pm.response.json();",
+									"",
+									"    // Assert",
+									"    pm.response.to.have.jsonSchema(responseSchema);",
+									"    pm.expect(responseBody).to.include(expectedFields);",
+									"    pm.expect(responseBody.id).to.be.a(\"number\");",
+									"    pm.collectionVariables.set(\"orderCreatedId\", responseBody.id);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					]
+				},
+				{
+					"name": "Get created order by ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/orders/{{orderCreatedId}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"orders",
+								"{{orderCreatedId}}"
+							]
+						}
+					},
+					"response": [],
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    // Arrange",
+									"    const expectedStatusCode = 200;",
+									"",
+									"    // Act",
+									"    const actualStatusCode = pm.response.code;",
+									"",
+									"    // Assert",
+									"    pm.expect(actualStatusCode).to.eql(expectedStatusCode);",
+									"});",
+									"",
+									"pm.test(\"Response time is less than 1000ms\", function () {",
+									"    // Arrange",
+									"    const maxResponseTime = 1000;",
+									"",
+									"    // Act",
+									"    const actualResponseTime = pm.response.responseTime;",
+									"",
+									"    // Assert",
+									"    pm.expect(actualResponseTime).to.be.below(maxResponseTime);",
+									"});",
+									"",
+									"pm.test(\"Content-Type is JSON\", function () {",
+									"    // Arrange",
+									"    const expectedContentType = \"application/json\";",
+									"",
+									"    // Act",
+									"    const actualContentType = pm.response.headers.get(\"Content-Type\");",
+									"",
+									"    // Assert",
+									"    pm.response.to.have.header(\"Content-Type\");",
+									"    pm.expect(actualContentType).to.include(expectedContentType);",
+									"});",
+									"",
+									"pm.test(\"Created order can be retrieved\", function () {",
+									"    // Arrange",
+									"    const responseSchema = {",
+									"    \"type\": \"object\",",
+									"    \"required\": [",
+									"        \"id\",",
+									"        \"name\",",
+									"        \"sku\"",
+									"    ],",
+									"    \"additionalProperties\": false,",
+									"    \"properties\": {",
+									"        \"id\": {",
+									"            \"type\": \"number\"",
+									"        },",
+									"        \"name\": {",
+									"            \"type\": \"string\"",
+									"        },",
+									"        \"sku\": {",
+									"            \"type\": \"number\"",
+									"        }",
+									"    }",
+									"};",
+									"    const expectedId = Number(pm.collectionVariables.get(\"orderCreatedId\"));",
+									"    const expectedFields = {",
+									"    \"name\": \"order5\",",
+									"    \"sku\": 123425445656765",
+									"};",
+									"",
+									"    // Act",
+									"    const responseBody = pm.response.json();",
+									"",
+									"    // Assert",
+									"    pm.response.to.have.jsonSchema(responseSchema);",
+									"    pm.expect(responseBody.id).to.eql(expectedId);",
+									"    pm.expect(responseBody).to.include(expectedFields);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					]
+				},
+				{
+					"name": "Update created order",
 					"request": {
 						"method": "PUT",
 						"header": [
@@ -1596,7 +2879,7 @@
 						},
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"id\": 4,\n    \"name\": \"order5\",\n    \"sku\": 123425445656765\n}",
+							"raw": "{\n    \"id\": {{orderCreatedId}},\n    \"name\": \"order-updated\",\n    \"sku\": 777777777777\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -1644,7 +2927,7 @@
 									"    pm.expect(actualContentType).to.include(expectedContentType);",
 									"});",
 									"",
-									"pm.test(\"Order is updated\", function () {",
+									"pm.test(\"Created order is updated\", function () {",
 									"    // Arrange",
 									"    const responseSchema = {",
 									"    \"type\": \"object\",",
@@ -1653,6 +2936,7 @@
 									"        \"name\",",
 									"        \"sku\"",
 									"    ],",
+									"    \"additionalProperties\": false,",
 									"    \"properties\": {",
 									"        \"id\": {",
 									"            \"type\": \"number\"",
@@ -1665,10 +2949,10 @@
 									"        }",
 									"    }",
 									"};",
-									"    const expectedObject = {",
-									"    \"id\": 4,",
-									"    \"name\": \"order5\",",
-									"    \"sku\": 123425445656765",
+									"    const expectedId = Number(pm.collectionVariables.get(\"orderCreatedId\"));",
+									"    const expectedFields = {",
+									"    \"name\": \"order-updated\",",
+									"    \"sku\": 777777777777",
 									"};",
 									"",
 									"    // Act",
@@ -1676,7 +2960,8 @@
 									"",
 									"    // Assert",
 									"    pm.response.to.have.jsonSchema(responseSchema);",
-									"    pm.expect(responseBody).to.include(expectedObject);",
+									"    pm.expect(responseBody.id).to.eql(expectedId);",
+									"    pm.expect(responseBody).to.include(expectedFields);",
 									"});"
 								],
 								"type": "text/javascript"
@@ -1685,18 +2970,18 @@
 					]
 				},
 				{
-					"name": "Remove order by ID",
+					"name": "Get updated order by ID",
 					"request": {
-						"method": "DELETE",
+						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "{{baseUrl}}/orders/4",
+							"raw": "{{baseUrl}}/orders/{{orderCreatedId}}",
 							"host": [
 								"{{baseUrl}}"
 							],
 							"path": [
 								"orders",
-								"4"
+								"{{orderCreatedId}}"
 							]
 						}
 					},
@@ -1740,7 +3025,7 @@
 									"    pm.expect(actualContentType).to.include(expectedContentType);",
 									"});",
 									"",
-									"pm.test(\"Deleted order is returned\", function () {",
+									"pm.test(\"Updated order can be retrieved\", function () {",
 									"    // Arrange",
 									"    const responseSchema = {",
 									"    \"type\": \"object\",",
@@ -1749,6 +3034,7 @@
 									"        \"name\",",
 									"        \"sku\"",
 									"    ],",
+									"    \"additionalProperties\": false,",
 									"    \"properties\": {",
 									"        \"id\": {",
 									"            \"type\": \"number\"",
@@ -1761,7 +3047,11 @@
 									"        }",
 									"    }",
 									"};",
-									"    const expectedId = 4;",
+									"    const expectedId = Number(pm.collectionVariables.get(\"orderCreatedId\"));",
+									"    const expectedFields = {",
+									"    \"name\": \"order-updated\",",
+									"    \"sku\": 777777777777",
+									"};",
 									"",
 									"    // Act",
 									"    const responseBody = pm.response.json();",
@@ -1769,6 +3059,176 @@
 									"    // Assert",
 									"    pm.response.to.have.jsonSchema(responseSchema);",
 									"    pm.expect(responseBody.id).to.eql(expectedId);",
+									"    pm.expect(responseBody).to.include(expectedFields);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					]
+				},
+				{
+					"name": "Remove created order by ID",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/orders/{{orderCreatedId}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"orders",
+								"{{orderCreatedId}}"
+							]
+						}
+					},
+					"response": [],
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    // Arrange",
+									"    const expectedStatusCode = 200;",
+									"",
+									"    // Act",
+									"    const actualStatusCode = pm.response.code;",
+									"",
+									"    // Assert",
+									"    pm.expect(actualStatusCode).to.eql(expectedStatusCode);",
+									"});",
+									"",
+									"pm.test(\"Response time is less than 1000ms\", function () {",
+									"    // Arrange",
+									"    const maxResponseTime = 1000;",
+									"",
+									"    // Act",
+									"    const actualResponseTime = pm.response.responseTime;",
+									"",
+									"    // Assert",
+									"    pm.expect(actualResponseTime).to.be.below(maxResponseTime);",
+									"});",
+									"",
+									"pm.test(\"Content-Type is JSON\", function () {",
+									"    // Arrange",
+									"    const expectedContentType = \"application/json\";",
+									"",
+									"    // Act",
+									"    const actualContentType = pm.response.headers.get(\"Content-Type\");",
+									"",
+									"    // Assert",
+									"    pm.response.to.have.header(\"Content-Type\");",
+									"    pm.expect(actualContentType).to.include(expectedContentType);",
+									"});",
+									"",
+									"pm.test(\"Created order is deleted\", function () {",
+									"    // Arrange",
+									"    const responseSchema = {",
+									"    \"type\": \"object\",",
+									"    \"required\": [",
+									"        \"id\",",
+									"        \"name\",",
+									"        \"sku\"",
+									"    ],",
+									"    \"additionalProperties\": false,",
+									"    \"properties\": {",
+									"        \"id\": {",
+									"            \"type\": \"number\"",
+									"        },",
+									"        \"name\": {",
+									"            \"type\": \"string\"",
+									"        },",
+									"        \"sku\": {",
+									"            \"type\": \"number\"",
+									"        }",
+									"    }",
+									"};",
+									"    const expectedId = Number(pm.collectionVariables.get(\"orderCreatedId\"));",
+									"",
+									"    // Act",
+									"    const responseBody = pm.response.json();",
+									"",
+									"    // Assert",
+									"    pm.response.to.have.jsonSchema(responseSchema);",
+									"    pm.expect(responseBody.id).to.eql(expectedId);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					]
+				},
+				{
+					"name": "Get deleted order by ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/orders/{{orderCreatedId}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"orders",
+								"{{orderCreatedId}}"
+							]
+						}
+					},
+					"response": [],
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 404\", function () {",
+									"    // Arrange",
+									"    const expectedStatusCode = 404;",
+									"",
+									"    // Act",
+									"    const actualStatusCode = pm.response.code;",
+									"",
+									"    // Assert",
+									"    pm.expect(actualStatusCode).to.eql(expectedStatusCode);",
+									"});",
+									"",
+									"pm.test(\"Response time is less than 1000ms\", function () {",
+									"    // Arrange",
+									"    const maxResponseTime = 1000;",
+									"",
+									"    // Act",
+									"    const actualResponseTime = pm.response.responseTime;",
+									"",
+									"    // Assert",
+									"    pm.expect(actualResponseTime).to.be.below(maxResponseTime);",
+									"});",
+									"",
+									"pm.test(\"Content-Type is JSON\", function () {",
+									"    // Arrange",
+									"    const expectedContentType = \"application/json\";",
+									"",
+									"    // Act",
+									"    const actualContentType = pm.response.headers.get(\"Content-Type\");",
+									"",
+									"    // Assert",
+									"    pm.response.to.have.header(\"Content-Type\");",
+									"    pm.expect(actualContentType).to.include(expectedContentType);",
+									"});",
+									"",
+									"pm.test(\"Deleted order cannot be retrieved\", function () {",
+									"    // Arrange",
+									"    const responseSchema = { type: \"object\", maxProperties: 0 };",
+									"    const deletedId = Number(pm.collectionVariables.get(\"orderCreatedId\"));",
+									"",
+									"    // Act",
+									"    const responseBody = pm.response.json();",
+									"",
+									"    // Assert",
+									"    pm.response.to.have.jsonSchema(responseSchema);",
+									"    pm.expect(deletedId).to.be.a(\"number\");",
+									"    pm.expect(responseBody).to.eql({});",
+									"    pm.collectionVariables.unset(\"orderCreatedId\");",
 									"});"
 								],
 								"type": "text/javascript"
@@ -1836,7 +3296,7 @@
 									"    pm.expect(actualContentType).to.include(expectedContentType);",
 									"});",
 									"",
-									"pm.test(\"Users list matches JSON schema\", function () {",
+									"pm.test(\"Users list matches strict JSON schema\", function () {",
 									"    // Arrange",
 									"    const itemSchema = {",
 									"    \"type\": \"object\",",
@@ -1851,6 +3311,7 @@
 									"        \"status\",",
 									"        \"level\"",
 									"    ],",
+									"    \"additionalProperties\": false,",
 									"    \"properties\": {",
 									"        \"id\": {",
 									"            \"type\": \"number\"",
@@ -1881,11 +3342,7 @@
 									"        }",
 									"    }",
 									"};",
-									"    const responseSchema = {",
-									"        type: \"array\",",
-									"        minItems: 1,",
-									"        items: itemSchema",
-									"    };",
+									"    const responseSchema = { type: \"array\", minItems: 1, items: itemSchema };",
 									"",
 									"    // Act",
 									"    const responseBody = pm.response.json();",
@@ -1893,6 +3350,23 @@
 									"    // Assert",
 									"    pm.response.to.have.jsonSchema(responseSchema);",
 									"    pm.expect(responseBody).to.be.an(\"array\").that.is.not.empty;",
+									"});",
+									"",
+									"pm.test(\"Existing user id is stored for dependent requests\", function () {",
+									"    // Arrange",
+									"    const fixture = {",
+									"    \"id\": 3,",
+									"    \"firstName\": \"Joe\",",
+									"    \"email\": \"joe.smith@gmail.com\"",
+									"};",
+									"",
+									"    // Act",
+									"    const responseBody = pm.response.json();",
+									"    const existingItem = responseBody.find((item) => item.id === fixture.id);",
+									"",
+									"    // Assert",
+									"    pm.expect(existingItem).to.include(fixture);",
+									"    pm.collectionVariables.set(\"userExistingId\", existingItem.id);",
 									"});"
 								],
 								"type": "text/javascript"
@@ -1980,6 +3454,7 @@
 									"        \"status\",",
 									"        \"level\"",
 									"    ],",
+									"    \"additionalProperties\": false,",
 									"    \"properties\": {",
 									"        \"id\": {",
 									"            \"type\": \"number\"",
@@ -2010,13 +3485,11 @@
 									"        }",
 									"    }",
 									"};",
-									"    const responseSchema = {",
-									"        type: \"array\",",
-									"        minItems: 2,",
-									"        maxItems: 2,",
-									"        items: itemSchema",
-									"    };",
-									"    const expectedIds = [1, 2];",
+									"    const responseSchema = { type: \"array\", minItems: 2, maxItems: 2, items: itemSchema };",
+									"    const expectedIds = [",
+									"    1,",
+									"    2",
+									"];",
 									"",
 									"    // Act",
 									"    const responseBody = pm.response.json();",
@@ -2034,7 +3507,171 @@
 					]
 				},
 				{
-					"name": "List users sorted by first name",
+					"name": "List users with empty page",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/users?page=999&pageSize=2",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"users"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "999"
+								},
+								{
+									"key": "pageSize",
+									"value": "2"
+								}
+							]
+						}
+					},
+					"response": [],
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    // Arrange",
+									"    const expectedStatusCode = 200;",
+									"",
+									"    // Act",
+									"    const actualStatusCode = pm.response.code;",
+									"",
+									"    // Assert",
+									"    pm.expect(actualStatusCode).to.eql(expectedStatusCode);",
+									"});",
+									"",
+									"pm.test(\"Response time is less than 1000ms\", function () {",
+									"    // Arrange",
+									"    const maxResponseTime = 1000;",
+									"",
+									"    // Act",
+									"    const actualResponseTime = pm.response.responseTime;",
+									"",
+									"    // Assert",
+									"    pm.expect(actualResponseTime).to.be.below(maxResponseTime);",
+									"});",
+									"",
+									"pm.test(\"Content-Type is JSON\", function () {",
+									"    // Arrange",
+									"    const expectedContentType = \"application/json\";",
+									"",
+									"    // Act",
+									"    const actualContentType = pm.response.headers.get(\"Content-Type\");",
+									"",
+									"    // Assert",
+									"    pm.response.to.have.header(\"Content-Type\");",
+									"    pm.expect(actualContentType).to.include(expectedContentType);",
+									"});",
+									"",
+									"pm.test(\"Users out-of-range pagination returns an empty page\", function () {",
+									"    // Arrange",
+									"    const responseSchema = { type: \"array\", maxItems: 0 };",
+									"",
+									"    // Act",
+									"    const responseBody = pm.response.json();",
+									"",
+									"    // Assert",
+									"    pm.response.to.have.jsonSchema(responseSchema);",
+									"    pm.expect(responseBody).to.eql([]);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					]
+				},
+				{
+					"name": "List users with zero page size",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/users?page=1&pageSize=0",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"users"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "1"
+								},
+								{
+									"key": "pageSize",
+									"value": "0"
+								}
+							]
+						}
+					},
+					"response": [],
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    // Arrange",
+									"    const expectedStatusCode = 200;",
+									"",
+									"    // Act",
+									"    const actualStatusCode = pm.response.code;",
+									"",
+									"    // Assert",
+									"    pm.expect(actualStatusCode).to.eql(expectedStatusCode);",
+									"});",
+									"",
+									"pm.test(\"Response time is less than 1000ms\", function () {",
+									"    // Arrange",
+									"    const maxResponseTime = 1000;",
+									"",
+									"    // Act",
+									"    const actualResponseTime = pm.response.responseTime;",
+									"",
+									"    // Assert",
+									"    pm.expect(actualResponseTime).to.be.below(maxResponseTime);",
+									"});",
+									"",
+									"pm.test(\"Content-Type is JSON\", function () {",
+									"    // Arrange",
+									"    const expectedContentType = \"application/json\";",
+									"",
+									"    // Act",
+									"    const actualContentType = pm.response.headers.get(\"Content-Type\");",
+									"",
+									"    // Assert",
+									"    pm.response.to.have.header(\"Content-Type\");",
+									"    pm.expect(actualContentType).to.include(expectedContentType);",
+									"});",
+									"",
+									"pm.test(\"Users zero page size returns an empty page\", function () {",
+									"    // Arrange",
+									"    const responseSchema = { type: \"array\", maxItems: 0 };",
+									"",
+									"    // Act",
+									"    const responseBody = pm.response.json();",
+									"",
+									"    // Assert",
+									"    pm.response.to.have.jsonSchema(responseSchema);",
+									"    pm.expect(responseBody).to.eql([]);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					]
+				},
+				{
+					"name": "List users sorted by firstName ASC",
 					"request": {
 						"method": "GET",
 						"header": [],
@@ -2098,7 +3735,7 @@
 									"    pm.expect(actualContentType).to.include(expectedContentType);",
 									"});",
 									"",
-									"pm.test(\"Users are sorted by firstName ascending\", function () {",
+									"pm.test(\"Users are sorted by firstName asc\", function () {",
 									"    // Arrange",
 									"    const itemSchema = {",
 									"    \"type\": \"object\",",
@@ -2113,6 +3750,7 @@
 									"        \"status\",",
 									"        \"level\"",
 									"    ],",
+									"    \"additionalProperties\": false,",
 									"    \"properties\": {",
 									"        \"id\": {",
 									"            \"type\": \"number\"",
@@ -2143,11 +3781,7 @@
 									"        }",
 									"    }",
 									"};",
-									"    const responseSchema = {",
-									"        type: \"array\",",
-									"        minItems: 1,",
-									"        items: itemSchema",
-									"    };",
+									"    const responseSchema = { type: \"array\", minItems: 1, items: itemSchema };",
 									"",
 									"    // Act",
 									"    const responseBody = pm.response.json();",
@@ -2165,18 +3799,27 @@
 					]
 				},
 				{
-					"name": "Get user by ID",
+					"name": "List users sorted by firstName DESC",
 					"request": {
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "{{baseUrl}}/users/3",
+							"raw": "{{baseUrl}}/users?sortOrder=DESC&sortKey=firstName",
 							"host": [
 								"{{baseUrl}}"
 							],
 							"path": [
-								"users",
-								"3"
+								"users"
+							],
+							"query": [
+								{
+									"key": "sortOrder",
+									"value": "DESC"
+								},
+								{
+									"key": "sortKey",
+									"value": "firstName"
+								}
 							]
 						}
 					},
@@ -2220,9 +3863,9 @@
 									"    pm.expect(actualContentType).to.include(expectedContentType);",
 									"});",
 									"",
-									"pm.test(\"User with expected id is returned\", function () {",
+									"pm.test(\"Users are sorted by firstName desc\", function () {",
 									"    // Arrange",
-									"    const responseSchema = {",
+									"    const itemSchema = {",
 									"    \"type\": \"object\",",
 									"    \"required\": [",
 									"        \"id\",",
@@ -2235,6 +3878,7 @@
 									"        \"status\",",
 									"        \"level\"",
 									"    ],",
+									"    \"additionalProperties\": false,",
 									"    \"properties\": {",
 									"        \"id\": {",
 									"            \"type\": \"number\"",
@@ -2265,7 +3909,127 @@
 									"        }",
 									"    }",
 									"};",
-									"    const expectedObject = {",
+									"    const responseSchema = { type: \"array\", minItems: 1, items: itemSchema };",
+									"",
+									"    // Act",
+									"    const responseBody = pm.response.json();",
+									"    const actualValues = responseBody.map((item) => item[\"firstName\"]);",
+									"    const expectedValues = [...actualValues].sort().reverse();",
+									"",
+									"    // Assert",
+									"    pm.response.to.have.jsonSchema(responseSchema);",
+									"    pm.expect(actualValues).to.eql(expectedValues);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					]
+				},
+				{
+					"name": "Get existing user by ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/users/{{userExistingId}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"users",
+								"{{userExistingId}}"
+							]
+						}
+					},
+					"response": [],
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    // Arrange",
+									"    const expectedStatusCode = 200;",
+									"",
+									"    // Act",
+									"    const actualStatusCode = pm.response.code;",
+									"",
+									"    // Assert",
+									"    pm.expect(actualStatusCode).to.eql(expectedStatusCode);",
+									"});",
+									"",
+									"pm.test(\"Response time is less than 1000ms\", function () {",
+									"    // Arrange",
+									"    const maxResponseTime = 1000;",
+									"",
+									"    // Act",
+									"    const actualResponseTime = pm.response.responseTime;",
+									"",
+									"    // Assert",
+									"    pm.expect(actualResponseTime).to.be.below(maxResponseTime);",
+									"});",
+									"",
+									"pm.test(\"Content-Type is JSON\", function () {",
+									"    // Arrange",
+									"    const expectedContentType = \"application/json\";",
+									"",
+									"    // Act",
+									"    const actualContentType = pm.response.headers.get(\"Content-Type\");",
+									"",
+									"    // Assert",
+									"    pm.response.to.have.header(\"Content-Type\");",
+									"    pm.expect(actualContentType).to.include(expectedContentType);",
+									"});",
+									"",
+									"pm.test(\"Existing user matches strict JSON schema and fixture data\", function () {",
+									"    // Arrange",
+									"    const responseSchema = {",
+									"    \"type\": \"object\",",
+									"    \"required\": [",
+									"        \"id\",",
+									"        \"firstName\",",
+									"        \"lastName\",",
+									"        \"email\",",
+									"        \"dateOfBirth\",",
+									"        \"emailVerified\",",
+									"        \"signUpDate\",",
+									"        \"status\",",
+									"        \"level\"",
+									"    ],",
+									"    \"additionalProperties\": false,",
+									"    \"properties\": {",
+									"        \"id\": {",
+									"            \"type\": \"number\"",
+									"        },",
+									"        \"firstName\": {",
+									"            \"type\": \"string\"",
+									"        },",
+									"        \"lastName\": {",
+									"            \"type\": \"string\"",
+									"        },",
+									"        \"email\": {",
+									"            \"type\": \"string\"",
+									"        },",
+									"        \"dateOfBirth\": {",
+									"            \"type\": \"string\"",
+									"        },",
+									"        \"emailVerified\": {",
+									"            \"type\": \"boolean\"",
+									"        },",
+									"        \"signUpDate\": {",
+									"            \"type\": \"string\"",
+									"        },",
+									"        \"status\": {",
+									"            \"type\": \"string\"",
+									"        },",
+									"        \"level\": {",
+									"            \"type\": \"string\"",
+									"        }",
+									"    }",
+									"};",
+									"    const expectedId = Number(pm.collectionVariables.get(\"userExistingId\"));",
+									"    const expectedFields = {",
 									"    \"id\": 3,",
 									"    \"firstName\": \"Joe\",",
 									"    \"email\": \"joe.smith@gmail.com\"",
@@ -2276,7 +4040,8 @@
 									"",
 									"    // Assert",
 									"    pm.response.to.have.jsonSchema(responseSchema);",
-									"    pm.expect(responseBody).to.include(expectedObject);",
+									"    pm.expect(responseBody.id).to.eql(expectedId);",
+									"    pm.expect(responseBody).to.include(expectedFields);",
 									"});"
 								],
 								"type": "text/javascript"
@@ -2285,7 +4050,7 @@
 					]
 				},
 				{
-					"name": "Get missing user by ID",
+					"name": "Get missing user by numeric ID",
 					"request": {
 						"method": "GET",
 						"header": [],
@@ -2328,6 +4093,18 @@
 									"    pm.expect(actualResponseTime).to.be.below(maxResponseTime);",
 									"});",
 									"",
+									"pm.test(\"Content-Type is JSON\", function () {",
+									"    // Arrange",
+									"    const expectedContentType = \"application/json\";",
+									"",
+									"    // Act",
+									"    const actualContentType = pm.response.headers.get(\"Content-Type\");",
+									"",
+									"    // Assert",
+									"    pm.response.to.have.header(\"Content-Type\");",
+									"    pm.expect(actualContentType).to.include(expectedContentType);",
+									"});",
+									"",
 									"pm.test(\"Missing user response is an empty JSON object\", function () {",
 									"    // Arrange",
 									"    const responseSchema = { type: \"object\", maxProperties: 0 };",
@@ -2346,32 +4123,19 @@
 					]
 				},
 				{
-					"name": "Create user",
+					"name": "Get user by invalid ID type",
 					"request": {
-						"method": "POST",
-						"header": [
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							}
-						],
+						"method": "GET",
+						"header": [],
 						"url": {
-							"raw": "{{baseUrl}}/users",
+							"raw": "{{baseUrl}}/users/abc",
 							"host": [
 								"{{baseUrl}}"
 							],
 							"path": [
-								"users"
+								"users",
+								"abc"
 							]
-						},
-						"body": {
-							"mode": "raw",
-							"raw": "{\n    \"firstName\": \"Dream\",\n    \"lastName\": \"Real\",\n    \"email\": \"dream.real@gmail.com\",\n    \"dateOfBirth\": \"2001-10-09\",\n    \"emailVerified\": true,\n    \"signUpDate\": \"2019-08-24\",\n    \"status\": \"active\",\n    \"level\": \"lord\"\n}",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
 						}
 					},
 					"response": [],
@@ -2380,9 +4144,9 @@
 							"listen": "test",
 							"script": {
 								"exec": [
-									"pm.test(\"Status code is 201\", function () {",
+									"pm.test(\"Status code is 404\", function () {",
 									"    // Arrange",
-									"    const expectedStatusCode = 201;",
+									"    const expectedStatusCode = 404;",
 									"",
 									"    // Act",
 									"    const actualStatusCode = pm.response.code;",
@@ -2414,67 +4178,89 @@
 									"    pm.expect(actualContentType).to.include(expectedContentType);",
 									"});",
 									"",
-									"pm.test(\"User is created with request data and generated id\", function () {",
+									"pm.test(\"Missing user response is an empty JSON object\", function () {",
 									"    // Arrange",
-									"    const responseSchema = {",
-									"    \"type\": \"object\",",
-									"    \"required\": [",
-									"        \"id\",",
-									"        \"firstName\",",
-									"        \"lastName\",",
-									"        \"email\",",
-									"        \"dateOfBirth\",",
-									"        \"emailVerified\",",
-									"        \"signUpDate\",",
-									"        \"status\",",
-									"        \"level\"",
-									"    ],",
-									"    \"properties\": {",
-									"        \"id\": {",
-									"            \"type\": \"number\"",
-									"        },",
-									"        \"firstName\": {",
-									"            \"type\": \"string\"",
-									"        },",
-									"        \"lastName\": {",
-									"            \"type\": \"string\"",
-									"        },",
-									"        \"email\": {",
-									"            \"type\": \"string\"",
-									"        },",
-									"        \"dateOfBirth\": {",
-									"            \"type\": \"string\"",
-									"        },",
-									"        \"emailVerified\": {",
-									"            \"type\": \"boolean\"",
-									"        },",
-									"        \"signUpDate\": {",
-									"            \"type\": \"string\"",
-									"        },",
-									"        \"status\": {",
-									"            \"type\": \"string\"",
-									"        },",
-									"        \"level\": {",
-									"            \"type\": \"string\"",
-									"        }",
-									"    }",
-									"};",
-									"    const expectedObject = {",
-									"    \"firstName\": \"Dream\",",
-									"    \"lastName\": \"Real\",",
-									"    \"email\": \"dream.real@gmail.com\",",
-									"    \"emailVerified\": true,",
-									"    \"status\": \"active\",",
-									"    \"level\": \"lord\"",
-									"};",
+									"    const responseSchema = { type: \"object\", maxProperties: 0 };",
 									"",
 									"    // Act",
 									"    const responseBody = pm.response.json();",
 									"",
 									"    // Assert",
 									"    pm.response.to.have.jsonSchema(responseSchema);",
-									"    pm.expect(responseBody).to.include(expectedObject);",
-									"    pm.expect(responseBody.id).to.be.a(\"number\");",
+									"    pm.expect(responseBody).to.eql({});",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					]
+				},
+				{
+					"name": "Create user with missing required fields",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/users",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"users"
+							]
+						},
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"email\": \"missing.fields@example.com\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						}
+					},
+					"response": [],
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 400\", function () {",
+									"    // Arrange",
+									"    const expectedStatusCode = 400;",
+									"",
+									"    // Act",
+									"    const actualStatusCode = pm.response.code;",
+									"",
+									"    // Assert",
+									"    pm.expect(actualStatusCode).to.eql(expectedStatusCode);",
+									"});",
+									"",
+									"pm.test(\"Response time is less than 1000ms\", function () {",
+									"    // Arrange",
+									"    const maxResponseTime = 1000;",
+									"",
+									"    // Act",
+									"    const actualResponseTime = pm.response.responseTime;",
+									"",
+									"    // Assert",
+									"    pm.expect(actualResponseTime).to.be.below(maxResponseTime);",
+									"});",
+									"",
+									"pm.test(\"Missing required user fields are rejected\", function () {",
+									"    // Arrange",
+									"    const expectedBody = \"\";",
+									"",
+									"    // Act",
+									"    const responseText = pm.response.text();",
+									"",
+									"    // Assert",
+									"    pm.expect(responseText).to.eql(expectedBody);",
 									"});"
 								],
 								"type": "text/javascript"
@@ -2556,7 +4342,272 @@
 					]
 				},
 				{
-					"name": "Update user",
+					"name": "Create user",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/users",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"users"
+							]
+						},
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"firstName\": \"Dream\",\n    \"lastName\": \"Real\",\n    \"email\": \"dream.real@gmail.com\",\n    \"dateOfBirth\": \"2001-10-09\",\n    \"emailVerified\": true,\n    \"signUpDate\": \"2019-08-24\",\n    \"status\": \"active\",\n    \"level\": \"lord\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						}
+					},
+					"response": [],
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 201\", function () {",
+									"    // Arrange",
+									"    const expectedStatusCode = 201;",
+									"",
+									"    // Act",
+									"    const actualStatusCode = pm.response.code;",
+									"",
+									"    // Assert",
+									"    pm.expect(actualStatusCode).to.eql(expectedStatusCode);",
+									"});",
+									"",
+									"pm.test(\"Response time is less than 1000ms\", function () {",
+									"    // Arrange",
+									"    const maxResponseTime = 1000;",
+									"",
+									"    // Act",
+									"    const actualResponseTime = pm.response.responseTime;",
+									"",
+									"    // Assert",
+									"    pm.expect(actualResponseTime).to.be.below(maxResponseTime);",
+									"});",
+									"",
+									"pm.test(\"Content-Type is JSON\", function () {",
+									"    // Arrange",
+									"    const expectedContentType = \"application/json\";",
+									"",
+									"    // Act",
+									"    const actualContentType = pm.response.headers.get(\"Content-Type\");",
+									"",
+									"    // Assert",
+									"    pm.response.to.have.header(\"Content-Type\");",
+									"    pm.expect(actualContentType).to.include(expectedContentType);",
+									"});",
+									"",
+									"pm.test(\"User is created and id is stored for lifecycle checks\", function () {",
+									"    // Arrange",
+									"    const responseSchema = {",
+									"    \"type\": \"object\",",
+									"    \"required\": [",
+									"        \"id\",",
+									"        \"firstName\",",
+									"        \"lastName\",",
+									"        \"email\",",
+									"        \"dateOfBirth\",",
+									"        \"emailVerified\",",
+									"        \"signUpDate\",",
+									"        \"status\",",
+									"        \"level\"",
+									"    ],",
+									"    \"additionalProperties\": false,",
+									"    \"properties\": {",
+									"        \"id\": {",
+									"            \"type\": \"number\"",
+									"        },",
+									"        \"firstName\": {",
+									"            \"type\": \"string\"",
+									"        },",
+									"        \"lastName\": {",
+									"            \"type\": \"string\"",
+									"        },",
+									"        \"email\": {",
+									"            \"type\": \"string\"",
+									"        },",
+									"        \"dateOfBirth\": {",
+									"            \"type\": \"string\"",
+									"        },",
+									"        \"emailVerified\": {",
+									"            \"type\": \"boolean\"",
+									"        },",
+									"        \"signUpDate\": {",
+									"            \"type\": \"string\"",
+									"        },",
+									"        \"status\": {",
+									"            \"type\": \"string\"",
+									"        },",
+									"        \"level\": {",
+									"            \"type\": \"string\"",
+									"        }",
+									"    }",
+									"};",
+									"    const expectedFields = {",
+									"    \"firstName\": \"Dream\",",
+									"    \"lastName\": \"Real\",",
+									"    \"email\": \"dream.real@gmail.com\",",
+									"    \"emailVerified\": true,",
+									"    \"status\": \"active\",",
+									"    \"level\": \"lord\"",
+									"};",
+									"",
+									"    // Act",
+									"    const responseBody = pm.response.json();",
+									"",
+									"    // Assert",
+									"    pm.response.to.have.jsonSchema(responseSchema);",
+									"    pm.expect(responseBody).to.include(expectedFields);",
+									"    pm.expect(responseBody.id).to.be.a(\"number\");",
+									"    pm.collectionVariables.set(\"userCreatedId\", responseBody.id);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					]
+				},
+				{
+					"name": "Get created user by ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/users/{{userCreatedId}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"users",
+								"{{userCreatedId}}"
+							]
+						}
+					},
+					"response": [],
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    // Arrange",
+									"    const expectedStatusCode = 200;",
+									"",
+									"    // Act",
+									"    const actualStatusCode = pm.response.code;",
+									"",
+									"    // Assert",
+									"    pm.expect(actualStatusCode).to.eql(expectedStatusCode);",
+									"});",
+									"",
+									"pm.test(\"Response time is less than 1000ms\", function () {",
+									"    // Arrange",
+									"    const maxResponseTime = 1000;",
+									"",
+									"    // Act",
+									"    const actualResponseTime = pm.response.responseTime;",
+									"",
+									"    // Assert",
+									"    pm.expect(actualResponseTime).to.be.below(maxResponseTime);",
+									"});",
+									"",
+									"pm.test(\"Content-Type is JSON\", function () {",
+									"    // Arrange",
+									"    const expectedContentType = \"application/json\";",
+									"",
+									"    // Act",
+									"    const actualContentType = pm.response.headers.get(\"Content-Type\");",
+									"",
+									"    // Assert",
+									"    pm.response.to.have.header(\"Content-Type\");",
+									"    pm.expect(actualContentType).to.include(expectedContentType);",
+									"});",
+									"",
+									"pm.test(\"Created user can be retrieved\", function () {",
+									"    // Arrange",
+									"    const responseSchema = {",
+									"    \"type\": \"object\",",
+									"    \"required\": [",
+									"        \"id\",",
+									"        \"firstName\",",
+									"        \"lastName\",",
+									"        \"email\",",
+									"        \"dateOfBirth\",",
+									"        \"emailVerified\",",
+									"        \"signUpDate\",",
+									"        \"status\",",
+									"        \"level\"",
+									"    ],",
+									"    \"additionalProperties\": false,",
+									"    \"properties\": {",
+									"        \"id\": {",
+									"            \"type\": \"number\"",
+									"        },",
+									"        \"firstName\": {",
+									"            \"type\": \"string\"",
+									"        },",
+									"        \"lastName\": {",
+									"            \"type\": \"string\"",
+									"        },",
+									"        \"email\": {",
+									"            \"type\": \"string\"",
+									"        },",
+									"        \"dateOfBirth\": {",
+									"            \"type\": \"string\"",
+									"        },",
+									"        \"emailVerified\": {",
+									"            \"type\": \"boolean\"",
+									"        },",
+									"        \"signUpDate\": {",
+									"            \"type\": \"string\"",
+									"        },",
+									"        \"status\": {",
+									"            \"type\": \"string\"",
+									"        },",
+									"        \"level\": {",
+									"            \"type\": \"string\"",
+									"        }",
+									"    }",
+									"};",
+									"    const expectedId = Number(pm.collectionVariables.get(\"userCreatedId\"));",
+									"    const expectedFields = {",
+									"    \"firstName\": \"Dream\",",
+									"    \"lastName\": \"Real\",",
+									"    \"email\": \"dream.real@gmail.com\",",
+									"    \"emailVerified\": true,",
+									"    \"status\": \"active\",",
+									"    \"level\": \"lord\"",
+									"};",
+									"",
+									"    // Act",
+									"    const responseBody = pm.response.json();",
+									"",
+									"    // Assert",
+									"    pm.response.to.have.jsonSchema(responseSchema);",
+									"    pm.expect(responseBody.id).to.eql(expectedId);",
+									"    pm.expect(responseBody).to.include(expectedFields);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					]
+				},
+				{
+					"name": "Update created user",
 					"request": {
 						"method": "PUT",
 						"header": [
@@ -2576,7 +4627,7 @@
 						},
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"id\": 10,\n    \"firstName\": \"Ilon\",\n    \"lastName\": \"Mask\",\n    \"email\": \"ilon.mask@gmail.com\",\n    \"dateOfBirth\": \"2001-10-09\",\n    \"emailVerified\": true,\n    \"signUpDate\": \"2019-08-24\",\n    \"status\": \"active\",\n    \"level\": \"lord\"\n}",
+							"raw": "{\n    \"id\": {{userCreatedId}},\n    \"firstName\": \"Ilon\",\n    \"lastName\": \"Mask\",\n    \"email\": \"ilon.mask@gmail.com\",\n    \"dateOfBirth\": \"2001-10-09\",\n    \"emailVerified\": true,\n    \"signUpDate\": \"2019-08-24\",\n    \"status\": \"active\",\n    \"level\": \"lord\"\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -2624,7 +4675,7 @@
 									"    pm.expect(actualContentType).to.include(expectedContentType);",
 									"});",
 									"",
-									"pm.test(\"User is updated\", function () {",
+									"pm.test(\"Created user is updated\", function () {",
 									"    // Arrange",
 									"    const responseSchema = {",
 									"    \"type\": \"object\",",
@@ -2639,6 +4690,7 @@
 									"        \"status\",",
 									"        \"level\"",
 									"    ],",
+									"    \"additionalProperties\": false,",
 									"    \"properties\": {",
 									"        \"id\": {",
 									"            \"type\": \"number\"",
@@ -2669,8 +4721,8 @@
 									"        }",
 									"    }",
 									"};",
-									"    const expectedObject = {",
-									"    \"id\": 10,",
+									"    const expectedId = Number(pm.collectionVariables.get(\"userCreatedId\"));",
+									"    const expectedFields = {",
 									"    \"firstName\": \"Ilon\",",
 									"    \"lastName\": \"Mask\",",
 									"    \"email\": \"ilon.mask@gmail.com\",",
@@ -2683,7 +4735,8 @@
 									"",
 									"    // Assert",
 									"    pm.response.to.have.jsonSchema(responseSchema);",
-									"    pm.expect(responseBody).to.include(expectedObject);",
+									"    pm.expect(responseBody.id).to.eql(expectedId);",
+									"    pm.expect(responseBody).to.include(expectedFields);",
 									"});"
 								],
 								"type": "text/javascript"
@@ -2692,18 +4745,18 @@
 					]
 				},
 				{
-					"name": "Remove user by ID",
+					"name": "Get updated user by ID",
 					"request": {
-						"method": "DELETE",
+						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "{{baseUrl}}/users/10",
+							"raw": "{{baseUrl}}/users/{{userCreatedId}}",
 							"host": [
 								"{{baseUrl}}"
 							],
 							"path": [
 								"users",
-								"10"
+								"{{userCreatedId}}"
 							]
 						}
 					},
@@ -2747,7 +4800,7 @@
 									"    pm.expect(actualContentType).to.include(expectedContentType);",
 									"});",
 									"",
-									"pm.test(\"Deleted user is returned\", function () {",
+									"pm.test(\"Updated user can be retrieved\", function () {",
 									"    // Arrange",
 									"    const responseSchema = {",
 									"    \"type\": \"object\",",
@@ -2762,6 +4815,7 @@
 									"        \"status\",",
 									"        \"level\"",
 									"    ],",
+									"    \"additionalProperties\": false,",
 									"    \"properties\": {",
 									"        \"id\": {",
 									"            \"type\": \"number\"",
@@ -2792,7 +4846,14 @@
 									"        }",
 									"    }",
 									"};",
-									"    const expectedId = 10;",
+									"    const expectedId = Number(pm.collectionVariables.get(\"userCreatedId\"));",
+									"    const expectedFields = {",
+									"    \"firstName\": \"Ilon\",",
+									"    \"lastName\": \"Mask\",",
+									"    \"email\": \"ilon.mask@gmail.com\",",
+									"    \"status\": \"active\",",
+									"    \"level\": \"lord\"",
+									"};",
 									"",
 									"    // Act",
 									"    const responseBody = pm.response.json();",
@@ -2800,6 +4861,200 @@
 									"    // Assert",
 									"    pm.response.to.have.jsonSchema(responseSchema);",
 									"    pm.expect(responseBody.id).to.eql(expectedId);",
+									"    pm.expect(responseBody).to.include(expectedFields);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					]
+				},
+				{
+					"name": "Remove created user by ID",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/users/{{userCreatedId}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"users",
+								"{{userCreatedId}}"
+							]
+						}
+					},
+					"response": [],
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    // Arrange",
+									"    const expectedStatusCode = 200;",
+									"",
+									"    // Act",
+									"    const actualStatusCode = pm.response.code;",
+									"",
+									"    // Assert",
+									"    pm.expect(actualStatusCode).to.eql(expectedStatusCode);",
+									"});",
+									"",
+									"pm.test(\"Response time is less than 1000ms\", function () {",
+									"    // Arrange",
+									"    const maxResponseTime = 1000;",
+									"",
+									"    // Act",
+									"    const actualResponseTime = pm.response.responseTime;",
+									"",
+									"    // Assert",
+									"    pm.expect(actualResponseTime).to.be.below(maxResponseTime);",
+									"});",
+									"",
+									"pm.test(\"Content-Type is JSON\", function () {",
+									"    // Arrange",
+									"    const expectedContentType = \"application/json\";",
+									"",
+									"    // Act",
+									"    const actualContentType = pm.response.headers.get(\"Content-Type\");",
+									"",
+									"    // Assert",
+									"    pm.response.to.have.header(\"Content-Type\");",
+									"    pm.expect(actualContentType).to.include(expectedContentType);",
+									"});",
+									"",
+									"pm.test(\"Created user is deleted\", function () {",
+									"    // Arrange",
+									"    const responseSchema = {",
+									"    \"type\": \"object\",",
+									"    \"required\": [",
+									"        \"id\",",
+									"        \"firstName\",",
+									"        \"lastName\",",
+									"        \"email\",",
+									"        \"dateOfBirth\",",
+									"        \"emailVerified\",",
+									"        \"signUpDate\",",
+									"        \"status\",",
+									"        \"level\"",
+									"    ],",
+									"    \"additionalProperties\": false,",
+									"    \"properties\": {",
+									"        \"id\": {",
+									"            \"type\": \"number\"",
+									"        },",
+									"        \"firstName\": {",
+									"            \"type\": \"string\"",
+									"        },",
+									"        \"lastName\": {",
+									"            \"type\": \"string\"",
+									"        },",
+									"        \"email\": {",
+									"            \"type\": \"string\"",
+									"        },",
+									"        \"dateOfBirth\": {",
+									"            \"type\": \"string\"",
+									"        },",
+									"        \"emailVerified\": {",
+									"            \"type\": \"boolean\"",
+									"        },",
+									"        \"signUpDate\": {",
+									"            \"type\": \"string\"",
+									"        },",
+									"        \"status\": {",
+									"            \"type\": \"string\"",
+									"        },",
+									"        \"level\": {",
+									"            \"type\": \"string\"",
+									"        }",
+									"    }",
+									"};",
+									"    const expectedId = Number(pm.collectionVariables.get(\"userCreatedId\"));",
+									"",
+									"    // Act",
+									"    const responseBody = pm.response.json();",
+									"",
+									"    // Assert",
+									"    pm.response.to.have.jsonSchema(responseSchema);",
+									"    pm.expect(responseBody.id).to.eql(expectedId);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					]
+				},
+				{
+					"name": "Get deleted user by ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/users/{{userCreatedId}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"users",
+								"{{userCreatedId}}"
+							]
+						}
+					},
+					"response": [],
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 404\", function () {",
+									"    // Arrange",
+									"    const expectedStatusCode = 404;",
+									"",
+									"    // Act",
+									"    const actualStatusCode = pm.response.code;",
+									"",
+									"    // Assert",
+									"    pm.expect(actualStatusCode).to.eql(expectedStatusCode);",
+									"});",
+									"",
+									"pm.test(\"Response time is less than 1000ms\", function () {",
+									"    // Arrange",
+									"    const maxResponseTime = 1000;",
+									"",
+									"    // Act",
+									"    const actualResponseTime = pm.response.responseTime;",
+									"",
+									"    // Assert",
+									"    pm.expect(actualResponseTime).to.be.below(maxResponseTime);",
+									"});",
+									"",
+									"pm.test(\"Content-Type is JSON\", function () {",
+									"    // Arrange",
+									"    const expectedContentType = \"application/json\";",
+									"",
+									"    // Act",
+									"    const actualContentType = pm.response.headers.get(\"Content-Type\");",
+									"",
+									"    // Assert",
+									"    pm.response.to.have.header(\"Content-Type\");",
+									"    pm.expect(actualContentType).to.include(expectedContentType);",
+									"});",
+									"",
+									"pm.test(\"Deleted user cannot be retrieved\", function () {",
+									"    // Arrange",
+									"    const responseSchema = { type: \"object\", maxProperties: 0 };",
+									"    const deletedId = Number(pm.collectionVariables.get(\"userCreatedId\"));",
+									"",
+									"    // Act",
+									"    const responseBody = pm.response.json();",
+									"",
+									"    // Assert",
+									"    pm.response.to.have.jsonSchema(responseSchema);",
+									"    pm.expect(deletedId).to.be.a(\"number\");",
+									"    pm.expect(responseBody).to.eql({});",
+									"    pm.collectionVariables.unset(\"userCreatedId\");",
 									"});"
 								],
 								"type": "text/javascript"
@@ -2834,6 +5089,36 @@
 		{
 			"key": "baseUrl",
 			"value": "http://localhost:3000",
+			"type": "string"
+		},
+		{
+			"key": "productExistingId",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "productCreatedId",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "orderExistingId",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "orderCreatedId",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "userExistingId",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "userCreatedId",
+			"value": "",
 			"type": "string"
 		}
 	]
