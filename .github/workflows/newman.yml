@@ -10,7 +10,11 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: write
+  contents: read
+  checks: write
+  pull-requests: write
+  pages: write
+  id-token: write
 
 concurrency:
   group: newman-pages
@@ -19,6 +23,8 @@ concurrency:
 jobs:
   api-tests:
     runs-on: ubuntu-latest
+    env:
+      API_URL: http://127.0.0.1:3000
 
     steps:
       - name: Checkout repository
@@ -42,12 +48,20 @@ jobs:
       - name: Run Store API Newman collection
         id: store_tests
         continue-on-error: true
-        run: npm run test:api:store
+        run: npm run test:api:store:ci
 
       - name: Run Petstore API Newman collection
         id: petstore_tests
         continue-on-error: true
-        run: npm run test:api:petstore
+        run: |
+          for attempt in 1 2; do
+            echo "Petstore Newman attempt ${attempt}/2"
+            if npm run test:api:petstore; then
+              exit 0
+            fi
+            sleep 10
+          done
+          exit 1
 
       - name: Generate reports dashboard
         if: always()
@@ -55,6 +69,15 @@ jobs:
           STORE_OUTCOME: ${{ steps.store_tests.outcome }}
           PETSTORE_OUTCOME: ${{ steps.petstore_tests.outcome }}
         run: npm run generate-dashboard
+
+      - name: Publish Newman JUnit test summary
+        uses: dorny/test-reporter@v1
+        if: always()
+        with:
+          name: Newman API Tests
+          path: newman-report/*-junit.xml
+          reporter: java-junit
+          fail-on-error: false
 
       - name: Upload Newman report artifact
         uses: actions/upload-artifact@v4
@@ -64,14 +87,33 @@ jobs:
           path: newman-report
           if-no-files-found: error
 
-      - name: Deploy Newman report to GitHub Pages branch
-        uses: peaceiris/actions-gh-pages@v4
+      - name: Configure GitHub Pages
+        uses: actions/configure-pages@v5
+        if: always() && github.event_name == 'push' && github.ref == 'refs/heads/main'
+
+      - name: Upload GitHub Pages artifact
+        uses: actions/upload-pages-artifact@v3
         if: always() && github.event_name == 'push' && github.ref == 'refs/heads/main'
         with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_branch: gh-pages
-          publish_dir: ./newman-report
-          force_orphan: true
+          path: newman-report
+
+      - name: Deploy Newman report to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
+        if: always() && github.event_name == 'push' && github.ref == 'refs/heads/main'
+
+      - name: Comment PR with report artifact link
+        uses: actions/github-script@v7
+        if: always() && github.event_name == 'pull_request'
+        with:
+          script: |
+            const artifactUrl = `${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`;
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              body: `Newman report artifact: ${artifactUrl}`
+            });
 
       - name: Fail workflow if Newman tests failed
         if: always() && (steps.store_tests.outcome != 'success' || steps.petstore_tests.outcome != 'success')

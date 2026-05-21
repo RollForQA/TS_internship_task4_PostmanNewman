@@ -1,2422 +1,2218 @@
 {
-	"info": {
-		"_postman_id": "4a0f5191-a707-404b-9e37-a6711475a264",
-		"name": "petstore",
-		"description": "This is a sample server Petstore server. For this sample, you can use the api key `special-key` to test the authorization filters.",
-		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
-		"_exporter_id": "18317683"
-	},
-	"item": [
-		{
-			"name": "pet",
-			"item": [
-				{
-					"name": "Create dynamic pet",
-					"event": [
-						{
-							"listen": "prerequest",
-							"script": {
-								"exec": [
-									"const dynamicPetId = Math.floor(Math.random() * 10000000) + 1000000;",
-									"pm.collectionVariables.set(\"dynamicPetId\", dynamicPetId);"
-								],
-								"type": "text/javascript"
-							}
-						},
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"pm.test(\"Status code is 200\", function () {",
-									"    // Arrange",
-									"    const expectedStatusCode = 200;",
-									"",
-									"    // Act",
-									"    const actualStatusCode = pm.response.code;",
-									"",
-									"    // Assert",
-									"    pm.expect(actualStatusCode).to.eql(expectedStatusCode);",
-									"});",
-									"",
-									"pm.test(\"Response time is less than 3000ms\", function () {",
-									"    // Arrange",
-									"    const maxResponseTime = 3000;",
-									"",
-									"    // Act",
-									"    const actualResponseTime = pm.response.responseTime;",
-									"",
-									"    // Assert",
-									"    pm.expect(actualResponseTime).to.be.below(maxResponseTime);",
-									"});",
-									"",
-									"pm.test(\"Created pet matches strict schema and dynamic id\", function () {",
-									"    // Arrange",
-									"    const responseSchema = {",
-									"    type: \"object\",",
-									"    required: [\"id\", \"category\", \"name\", \"photoUrls\", \"tags\", \"status\"],",
-									"    additionalProperties: false,",
-									"    properties: {",
-									"        id: { type: \"number\" },",
-									"        category: {",
-									"            type: \"object\",",
-									"            required: [\"id\", \"name\"],",
-									"            additionalProperties: false,",
-									"            properties: { id: { type: \"number\" }, name: { type: \"string\" } }",
-									"        },",
-									"        name: { type: \"string\" },",
-									"        photoUrls: { type: \"array\", items: { type: \"string\" } },",
-									"        tags: {",
-									"            type: \"array\",",
-									"            items: {",
-									"                type: \"object\",",
-									"                required: [\"id\", \"name\"],",
-									"                additionalProperties: false,",
-									"                properties: { id: { type: \"number\" }, name: { type: \"string\" } }",
-									"            }",
-									"        },",
-									"        status: { type: \"string\" }",
-									"    }",
-									"};",
-									"    const expectedId = Number(pm.collectionVariables.get(\"dynamicPetId\"));",
-									"",
-									"    // Act",
-									"    const responseBody = pm.response.json();",
-									"",
-									"    // Assert",
-									"    pm.response.to.have.jsonSchema(responseSchema);",
-									"    pm.expect(responseBody.id).to.eql(expectedId);",
-									"    pm.expect(responseBody.name).to.eql(\"NewmanDog\");",
-									"    pm.expect(responseBody.status).to.eql(\"available\");",
-									"});"
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"method": "POST",
-						"header": [
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							},
-							{
-								"key": "Accept",
-								"value": "application/json"
-							}
-						],
-						"url": {
-							"raw": "{{baseUrl}}/pet",
-							"host": [
-								"{{baseUrl}}"
-							],
-							"path": [
-								"pet"
-							]
-						},
-						"body": {
-							"mode": "raw",
-							"raw": "{\n  \"id\": {{dynamicPetId}},\n  \"category\": { \"id\": 1, \"name\": \"Dogs\" },\n  \"name\": \"NewmanDog\",\n  \"photoUrls\": [\"https://example.com/dog.jpg\"],\n  \"tags\": [{ \"id\": 1, \"name\": \"Large\" }],\n  \"status\": \"available\"\n}",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Get created pet by ID",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"pm.test(\"Status code is 200\", function () {",
-									"    // Arrange",
-									"    const expectedStatusCode = 200;",
-									"",
-									"    // Act",
-									"    const actualStatusCode = pm.response.code;",
-									"",
-									"    // Assert",
-									"    pm.expect(actualStatusCode).to.eql(expectedStatusCode);",
-									"});",
-									"",
-									"pm.test(\"Response time is less than 3000ms\", function () {",
-									"    // Arrange",
-									"    const maxResponseTime = 3000;",
-									"",
-									"    // Act",
-									"    const actualResponseTime = pm.response.responseTime;",
-									"",
-									"    // Assert",
-									"    pm.expect(actualResponseTime).to.be.below(maxResponseTime);",
-									"});",
-									"",
-									"pm.test(\"Created pet can be retrieved\", function () {",
-									"    // Arrange",
-									"    const responseSchema = {",
-									"    type: \"object\",",
-									"    required: [\"id\", \"category\", \"name\", \"photoUrls\", \"tags\", \"status\"],",
-									"    additionalProperties: false,",
-									"    properties: {",
-									"        id: { type: \"number\" },",
-									"        category: {",
-									"            type: \"object\",",
-									"            required: [\"id\", \"name\"],",
-									"            additionalProperties: false,",
-									"            properties: { id: { type: \"number\" }, name: { type: \"string\" } }",
-									"        },",
-									"        name: { type: \"string\" },",
-									"        photoUrls: { type: \"array\", items: { type: \"string\" } },",
-									"        tags: {",
-									"            type: \"array\",",
-									"            items: {",
-									"                type: \"object\",",
-									"                required: [\"id\", \"name\"],",
-									"                additionalProperties: false,",
-									"                properties: { id: { type: \"number\" }, name: { type: \"string\" } }",
-									"            }",
-									"        },",
-									"        status: { type: \"string\" }",
-									"    }",
-									"};",
-									"    const expectedId = Number(pm.collectionVariables.get(\"dynamicPetId\"));",
-									"",
-									"    // Act",
-									"    const responseBody = pm.response.json();",
-									"",
-									"    // Assert",
-									"    pm.response.to.have.jsonSchema(responseSchema);",
-									"    pm.expect(responseBody.id).to.eql(expectedId);",
-									"    pm.expect(responseBody.name).to.eql(\"NewmanDog\");",
-									"});"
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"method": "GET",
-						"header": [
-							{
-								"key": "Accept",
-								"value": "application/json"
-							}
-						],
-						"url": {
-							"raw": "{{baseUrl}}/pet/:petId",
-							"host": [
-								"{{baseUrl}}"
-							],
-							"path": [
-								"pet",
-								":petId"
-							],
-							"variable": [
-								{
-									"key": "petId",
-									"value": "{{dynamicPetId}}",
-									"description": "Dynamic pet id created during the collection run"
-								}
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Update created pet with form data",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"pm.test(\"Status code is 200\", function () {",
-									"    // Arrange",
-									"    const expectedStatusCode = 200;",
-									"",
-									"    // Act",
-									"    const actualStatusCode = pm.response.code;",
-									"",
-									"    // Assert",
-									"    pm.expect(actualStatusCode).to.eql(expectedStatusCode);",
-									"});",
-									"",
-									"pm.test(\"Response time is less than 3000ms\", function () {",
-									"    // Arrange",
-									"    const maxResponseTime = 3000;",
-									"",
-									"    // Act",
-									"    const actualResponseTime = pm.response.responseTime;",
-									"",
-									"    // Assert",
-									"    pm.expect(actualResponseTime).to.be.below(maxResponseTime);",
-									"});",
-									"",
-									"pm.test(\"Update response references dynamic pet id\", function () {",
-									"    // Arrange",
-									"    const responseSchema = {",
-									"    type: \"object\",",
-									"    required: [\"code\", \"type\", \"message\"],",
-									"    additionalProperties: false,",
-									"    properties: {",
-									"        code: { type: \"number\" },",
-									"        type: { type: \"string\" },",
-									"        message: { type: \"string\" }",
-									"    }",
-									"};",
-									"    const expectedMessage = pm.collectionVariables.get(\"dynamicPetId\");",
-									"",
-									"    // Act",
-									"    const responseBody = pm.response.json();",
-									"",
-									"    // Assert",
-									"    pm.response.to.have.jsonSchema(responseSchema);",
-									"    pm.expect(String(responseBody.message)).to.eql(String(expectedMessage));",
-									"});"
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"method": "POST",
-						"header": [
-							{
-								"key": "Content-Type",
-								"value": "application/x-www-form-urlencoded"
-							}
-						],
-						"url": {
-							"raw": "{{baseUrl}}/pet/:petId",
-							"host": [
-								"{{baseUrl}}"
-							],
-							"path": [
-								"pet",
-								":petId"
-							],
-							"variable": [
-								{
-									"key": "petId",
-									"value": "{{dynamicPetId}}",
-									"description": "Dynamic pet id created during the collection run"
-								}
-							]
-						},
-						"body": {
-							"mode": "urlencoded",
-							"urlencoded": [
-								{
-									"key": "name",
-									"value": "UpdatedNewmanDog",
-									"type": "text"
-								},
-								{
-									"key": "status",
-									"value": "sold",
-									"type": "text"
-								}
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Get updated pet by ID",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"pm.test(\"Status code is 200\", function () {",
-									"    // Arrange",
-									"    const expectedStatusCode = 200;",
-									"",
-									"    // Act",
-									"    const actualStatusCode = pm.response.code;",
-									"",
-									"    // Assert",
-									"    pm.expect(actualStatusCode).to.eql(expectedStatusCode);",
-									"});",
-									"",
-									"pm.test(\"Response time is less than 3000ms\", function () {",
-									"    // Arrange",
-									"    const maxResponseTime = 3000;",
-									"",
-									"    // Act",
-									"    const actualResponseTime = pm.response.responseTime;",
-									"",
-									"    // Assert",
-									"    pm.expect(actualResponseTime).to.be.below(maxResponseTime);",
-									"});",
-									"",
-									"pm.test(\"Updated pet can be retrieved\", function () {",
-									"    // Arrange",
-									"    const responseSchema = {",
-									"    type: \"object\",",
-									"    required: [\"id\", \"category\", \"name\", \"photoUrls\", \"tags\", \"status\"],",
-									"    additionalProperties: false,",
-									"    properties: {",
-									"        id: { type: \"number\" },",
-									"        category: {",
-									"            type: \"object\",",
-									"            required: [\"id\", \"name\"],",
-									"            additionalProperties: false,",
-									"            properties: { id: { type: \"number\" }, name: { type: \"string\" } }",
-									"        },",
-									"        name: { type: \"string\" },",
-									"        photoUrls: { type: \"array\", items: { type: \"string\" } },",
-									"        tags: {",
-									"            type: \"array\",",
-									"            items: {",
-									"                type: \"object\",",
-									"                required: [\"id\", \"name\"],",
-									"                additionalProperties: false,",
-									"                properties: { id: { type: \"number\" }, name: { type: \"string\" } }",
-									"            }",
-									"        },",
-									"        status: { type: \"string\" }",
-									"    }",
-									"};",
-									"    const expectedId = Number(pm.collectionVariables.get(\"dynamicPetId\"));",
-									"",
-									"    // Act",
-									"    const responseBody = pm.response.json();",
-									"",
-									"    // Assert",
-									"    pm.response.to.have.jsonSchema(responseSchema);",
-									"    pm.expect(responseBody.id).to.eql(expectedId);",
-									"    pm.expect(responseBody.name).to.eql(\"UpdatedNewmanDog\");",
-									"    pm.expect(responseBody.status).to.eql(\"sold\");",
-									"});"
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"method": "GET",
-						"header": [
-							{
-								"key": "Accept",
-								"value": "application/json"
-							}
-						],
-						"url": {
-							"raw": "{{baseUrl}}/pet/:petId",
-							"host": [
-								"{{baseUrl}}"
-							],
-							"path": [
-								"pet",
-								":petId"
-							],
-							"variable": [
-								{
-									"key": "petId",
-									"value": "{{dynamicPetId}}",
-									"description": "Dynamic pet id created during the collection run"
-								}
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Find pets by valid status",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"pm.test(\"Status code is 200\", function () {",
-									"    // Arrange",
-									"    const expectedStatusCode = 200;",
-									"",
-									"    // Act",
-									"    const actualStatusCode = pm.response.code;",
-									"",
-									"    // Assert",
-									"    pm.expect(actualStatusCode).to.eql(expectedStatusCode);",
-									"});",
-									"",
-									"pm.test(\"Response time is less than 3000ms\", function () {",
-									"    // Arrange",
-									"    const maxResponseTime = 3000;",
-									"",
-									"    // Act",
-									"    const actualResponseTime = pm.response.responseTime;",
-									"",
-									"    // Assert",
-									"    pm.expect(actualResponseTime).to.be.below(maxResponseTime);",
-									"});",
-									"",
-									"pm.test(\"Available pets response is an array\", function () {",
-									"    // Arrange",
-									"    const responseSchema = { type: \"array\" };",
-									"",
-									"    // Act",
-									"    const responseBody = pm.response.json();",
-									"",
-									"    // Assert",
-									"    pm.response.to.have.jsonSchema(responseSchema);",
-									"    pm.expect(responseBody).to.be.an(\"array\");",
-									"});"
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"method": "GET",
-						"header": [
-							{
-								"key": "Accept",
-								"value": "application/json"
-							}
-						],
-						"url": {
-							"raw": "{{baseUrl}}/pet/findByStatus?status=available",
-							"host": [
-								"{{baseUrl}}"
-							],
-							"path": [
-								"pet",
-								"findByStatus"
-							],
-							"query": [
-								{
-									"key": "status",
-									"value": "available"
-								}
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Find pets by invalid status",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"pm.test(\"Status code is 200\", function () {",
-									"    // Arrange",
-									"    const expectedStatusCode = 200;",
-									"",
-									"    // Act",
-									"    const actualStatusCode = pm.response.code;",
-									"",
-									"    // Assert",
-									"    pm.expect(actualStatusCode).to.eql(expectedStatusCode);",
-									"});",
-									"",
-									"pm.test(\"Response time is less than 3000ms\", function () {",
-									"    // Arrange",
-									"    const maxResponseTime = 3000;",
-									"",
-									"    // Act",
-									"    const actualResponseTime = pm.response.responseTime;",
-									"",
-									"    // Assert",
-									"    pm.expect(actualResponseTime).to.be.below(maxResponseTime);",
-									"});",
-									"",
-									"pm.test(\"Invalid status returns an empty array\", function () {",
-									"    // Arrange",
-									"    const responseSchema = { type: \"array\", maxItems: 0 };",
-									"",
-									"    // Act",
-									"    const responseBody = pm.response.json();",
-									"",
-									"    // Assert",
-									"    pm.response.to.have.jsonSchema(responseSchema);",
-									"    pm.expect(responseBody).to.eql([]);",
-									"});"
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"method": "GET",
-						"header": [
-							{
-								"key": "Accept",
-								"value": "application/json"
-							}
-						],
-						"url": {
-							"raw": "{{baseUrl}}/pet/findByStatus?status=invalidStatus",
-							"host": [
-								"{{baseUrl}}"
-							],
-							"path": [
-								"pet",
-								"findByStatus"
-							],
-							"query": [
-								{
-									"key": "status",
-									"value": "invalidStatus"
-								}
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Find pets by tag",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"pm.test(\"Status code is 200\", function () {",
-									"    // Arrange",
-									"    const expectedStatusCode = 200;",
-									"",
-									"    // Act",
-									"    const actualStatusCode = pm.response.code;",
-									"",
-									"    // Assert",
-									"    pm.expect(actualStatusCode).to.eql(expectedStatusCode);",
-									"});",
-									"",
-									"pm.test(\"Response time is less than 3000ms\", function () {",
-									"    // Arrange",
-									"    const maxResponseTime = 3000;",
-									"",
-									"    // Act",
-									"    const actualResponseTime = pm.response.responseTime;",
-									"",
-									"    // Assert",
-									"    pm.expect(actualResponseTime).to.be.below(maxResponseTime);",
-									"});",
-									"",
-									"pm.test(\"Tagged pets response is an array\", function () {",
-									"    // Arrange",
-									"    const responseSchema = { type: \"array\" };",
-									"",
-									"    // Act",
-									"    const responseBody = pm.response.json();",
-									"",
-									"    // Assert",
-									"    pm.response.to.have.jsonSchema(responseSchema);",
-									"    pm.expect(responseBody).to.be.an(\"array\");",
-									"});"
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"method": "GET",
-						"header": [
-							{
-								"key": "Accept",
-								"value": "application/json"
-							}
-						],
-						"url": {
-							"raw": "{{baseUrl}}/pet/findByTags?tags=Large",
-							"host": [
-								"{{baseUrl}}"
-							],
-							"path": [
-								"pet",
-								"findByTags"
-							],
-							"query": [
-								{
-									"key": "tags",
-									"value": "Large"
-								}
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Get pet by invalid ID type",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"pm.test(\"Status code is 404\", function () {",
-									"    // Arrange",
-									"    const expectedStatusCode = 404;",
-									"",
-									"    // Act",
-									"    const actualStatusCode = pm.response.code;",
-									"",
-									"    // Assert",
-									"    pm.expect(actualStatusCode).to.eql(expectedStatusCode);",
-									"});",
-									"",
-									"pm.test(\"Response time is less than 3000ms\", function () {",
-									"    // Arrange",
-									"    const maxResponseTime = 3000;",
-									"",
-									"    // Act",
-									"    const actualResponseTime = pm.response.responseTime;",
-									"",
-									"    // Assert",
-									"    pm.expect(actualResponseTime).to.be.below(maxResponseTime);",
-									"});",
-									"",
-									"pm.test(\"Invalid pet id returns API error schema\", function () {",
-									"    // Arrange",
-									"    const responseSchema = {",
-									"    type: \"object\",",
-									"    required: [\"code\", \"type\", \"message\"],",
-									"    additionalProperties: false,",
-									"    properties: {",
-									"        code: { type: \"number\" },",
-									"        type: { type: \"string\" },",
-									"        message: { type: \"string\" }",
-									"    }",
-									"};",
-									"",
-									"    // Act",
-									"    const responseBody = pm.response.json();",
-									"",
-									"    // Assert",
-									"    pm.response.to.have.jsonSchema(responseSchema);",
-									"    pm.expect(responseBody.message).to.include(\"NumberFormatException\");",
-									"});"
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"method": "GET",
-						"header": [
-							{
-								"key": "Accept",
-								"value": "application/json"
-							}
-						],
-						"url": {
-							"raw": "{{baseUrl}}/pet/abc",
-							"host": [
-								"{{baseUrl}}"
-							],
-							"path": [
-								"pet",
-								"abc"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Get missing pet by numeric ID",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"pm.test(\"Status code is 404\", function () {",
-									"    // Arrange",
-									"    const expectedStatusCode = 404;",
-									"",
-									"    // Act",
-									"    const actualStatusCode = pm.response.code;",
-									"",
-									"    // Assert",
-									"    pm.expect(actualStatusCode).to.eql(expectedStatusCode);",
-									"});",
-									"",
-									"pm.test(\"Response time is less than 3000ms\", function () {",
-									"    // Arrange",
-									"    const maxResponseTime = 3000;",
-									"",
-									"    // Act",
-									"    const actualResponseTime = pm.response.responseTime;",
-									"",
-									"    // Assert",
-									"    pm.expect(actualResponseTime).to.be.below(maxResponseTime);",
-									"});",
-									"",
-									"pm.test(\"Missing pet returns API error schema\", function () {",
-									"    // Arrange",
-									"    const responseSchema = {",
-									"    type: \"object\",",
-									"    required: [\"code\", \"type\", \"message\"],",
-									"    additionalProperties: false,",
-									"    properties: {",
-									"        code: { type: \"number\" },",
-									"        type: { type: \"string\" },",
-									"        message: { type: \"string\" }",
-									"    }",
-									"};",
-									"",
-									"    // Act",
-									"    const responseBody = pm.response.json();",
-									"",
-									"    // Assert",
-									"    pm.response.to.have.jsonSchema(responseSchema);",
-									"    pm.expect(responseBody.message).to.eql(\"Pet not found\");",
-									"});"
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"method": "GET",
-						"header": [
-							{
-								"key": "Accept",
-								"value": "application/json"
-							}
-						],
-						"url": {
-							"raw": "{{baseUrl}}/pet/999999999999",
-							"host": [
-								"{{baseUrl}}"
-							],
-							"path": [
-								"pet",
-								"999999999999"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Create pet with malformed JSON",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"pm.test(\"Status code is 400\", function () {",
-									"    // Arrange",
-									"    const expectedStatusCode = 400;",
-									"",
-									"    // Act",
-									"    const actualStatusCode = pm.response.code;",
-									"",
-									"    // Assert",
-									"    pm.expect(actualStatusCode).to.eql(expectedStatusCode);",
-									"});",
-									"",
-									"pm.test(\"Response time is less than 3000ms\", function () {",
-									"    // Arrange",
-									"    const maxResponseTime = 3000;",
-									"",
-									"    // Act",
-									"    const actualResponseTime = pm.response.responseTime;",
-									"",
-									"    // Assert",
-									"    pm.expect(actualResponseTime).to.be.below(maxResponseTime);",
-									"});",
-									"",
-									"pm.test(\"Malformed pet JSON returns API error schema\", function () {",
-									"    // Arrange",
-									"    const responseSchema = {",
-									"    type: \"object\",",
-									"    required: [\"code\", \"type\", \"message\"],",
-									"    additionalProperties: false,",
-									"    properties: {",
-									"        code: { type: \"number\" },",
-									"        type: { type: \"string\" },",
-									"        message: { type: \"string\" }",
-									"    }",
-									"};",
-									"",
-									"    // Act",
-									"    const responseBody = pm.response.json();",
-									"",
-									"    // Assert",
-									"    pm.response.to.have.jsonSchema(responseSchema);",
-									"    pm.expect(responseBody.message).to.eql(\"bad input\");",
-									"});"
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"method": "POST",
-						"header": [
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							},
-							{
-								"key": "Accept",
-								"value": "application/json"
-							}
-						],
-						"url": {
-							"raw": "{{baseUrl}}/pet",
-							"host": [
-								"{{baseUrl}}"
-							],
-							"path": [
-								"pet"
-							]
-						},
-						"body": {
-							"mode": "raw",
-							"raw": "{bad json",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Delete created pet",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"pm.test(\"Status code is 200\", function () {",
-									"    // Arrange",
-									"    const expectedStatusCode = 200;",
-									"",
-									"    // Act",
-									"    const actualStatusCode = pm.response.code;",
-									"",
-									"    // Assert",
-									"    pm.expect(actualStatusCode).to.eql(expectedStatusCode);",
-									"});",
-									"",
-									"pm.test(\"Response time is less than 3000ms\", function () {",
-									"    // Arrange",
-									"    const maxResponseTime = 3000;",
-									"",
-									"    // Act",
-									"    const actualResponseTime = pm.response.responseTime;",
-									"",
-									"    // Assert",
-									"    pm.expect(actualResponseTime).to.be.below(maxResponseTime);",
-									"});",
-									"",
-									"pm.test(\"Delete response references dynamic pet id\", function () {",
-									"    // Arrange",
-									"    const responseSchema = {",
-									"    type: \"object\",",
-									"    required: [\"code\", \"type\", \"message\"],",
-									"    additionalProperties: false,",
-									"    properties: {",
-									"        code: { type: \"number\" },",
-									"        type: { type: \"string\" },",
-									"        message: { type: \"string\" }",
-									"    }",
-									"};",
-									"    const expectedMessage = pm.collectionVariables.get(\"dynamicPetId\");",
-									"",
-									"    // Act",
-									"    const responseBody = pm.response.json();",
-									"",
-									"    // Assert",
-									"    pm.response.to.have.jsonSchema(responseSchema);",
-									"    pm.expect(String(responseBody.message)).to.eql(String(expectedMessage));",
-									"});"
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"method": "DELETE",
-						"header": [
-							{
-								"key": "Accept",
-								"value": "application/json"
-							}
-						],
-						"url": {
-							"raw": "{{baseUrl}}/pet/:petId",
-							"host": [
-								"{{baseUrl}}"
-							],
-							"path": [
-								"pet",
-								":petId"
-							],
-							"variable": [
-								{
-									"key": "petId",
-									"value": "{{dynamicPetId}}",
-									"description": "Dynamic pet id created during the collection run"
-								}
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Get deleted pet by ID",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"pm.test(\"Status code is 404\", function () {",
-									"    // Arrange",
-									"    const expectedStatusCode = 404;",
-									"",
-									"    // Act",
-									"    const actualStatusCode = pm.response.code;",
-									"",
-									"    // Assert",
-									"    pm.expect(actualStatusCode).to.eql(expectedStatusCode);",
-									"});",
-									"",
-									"pm.test(\"Response time is less than 3000ms\", function () {",
-									"    // Arrange",
-									"    const maxResponseTime = 3000;",
-									"",
-									"    // Act",
-									"    const actualResponseTime = pm.response.responseTime;",
-									"",
-									"    // Assert",
-									"    pm.expect(actualResponseTime).to.be.below(maxResponseTime);",
-									"});",
-									"",
-									"pm.test(\"Deleted pet returns API error schema\", function () {",
-									"    // Arrange",
-									"    const responseSchema = {",
-									"    type: \"object\",",
-									"    required: [\"code\", \"type\", \"message\"],",
-									"    additionalProperties: false,",
-									"    properties: {",
-									"        code: { type: \"number\" },",
-									"        type: { type: \"string\" },",
-									"        message: { type: \"string\" }",
-									"    }",
-									"};",
-									"",
-									"    // Act",
-									"    const responseBody = pm.response.json();",
-									"",
-									"    // Assert",
-									"    pm.response.to.have.jsonSchema(responseSchema);",
-									"    pm.expect(responseBody.message).to.eql(\"Pet not found\");",
-									"    pm.collectionVariables.unset(\"dynamicPetId\");",
-									"});"
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"method": "GET",
-						"header": [
-							{
-								"key": "Accept",
-								"value": "application/json"
-							}
-						],
-						"url": {
-							"raw": "{{baseUrl}}/pet/:petId",
-							"host": [
-								"{{baseUrl}}"
-							],
-							"path": [
-								"pet",
-								":petId"
-							],
-							"variable": [
-								{
-									"key": "petId",
-									"value": "{{dynamicPetId}}",
-									"description": "Dynamic pet id created during the collection run"
-								}
-							]
-						}
-					},
-					"response": []
-				}
-			]
-		},
-		{
-			"name": "store",
-			"item": [
-				{
-					"name": "Create order for dynamic pet",
-					"event": [
-						{
-							"listen": "prerequest",
-							"script": {
-								"exec": [
-									"const dynamicOrderId = Math.floor(Math.random() * 100000) + 1000;",
-									"pm.collectionVariables.set(\"dynamicOrderId\", dynamicOrderId);",
-									"if (!pm.collectionVariables.get(\"dynamicPetIdForOrder\")) {",
-									"    pm.collectionVariables.set(\"dynamicPetIdForOrder\", Math.floor(Math.random() * 10000000) + 1000000);",
-									"}",
-									"pm.collectionVariables.set(\"dynamicPetId\", pm.collectionVariables.get(\"dynamicPetIdForOrder\"));"
-								],
-								"type": "text/javascript"
-							}
-						},
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"pm.test(\"Status code is 200\", function () {",
-									"    // Arrange",
-									"    const expectedStatusCode = 200;",
-									"",
-									"    // Act",
-									"    const actualStatusCode = pm.response.code;",
-									"",
-									"    // Assert",
-									"    pm.expect(actualStatusCode).to.eql(expectedStatusCode);",
-									"});",
-									"",
-									"pm.test(\"Response time is less than 3000ms\", function () {",
-									"    // Arrange",
-									"    const maxResponseTime = 3000;",
-									"",
-									"    // Act",
-									"    const actualResponseTime = pm.response.responseTime;",
-									"",
-									"    // Assert",
-									"    pm.expect(actualResponseTime).to.be.below(maxResponseTime);",
-									"});",
-									"",
-									"pm.test(\"Created order matches strict schema\", function () {",
-									"    // Arrange",
-									"    const responseSchema = {",
-									"    type: \"object\",",
-									"    required: [\"id\", \"petId\", \"quantity\", \"shipDate\", \"status\", \"complete\"],",
-									"    additionalProperties: false,",
-									"    properties: {",
-									"        id: { type: \"number\" },",
-									"        petId: { type: \"number\" },",
-									"        quantity: { type: \"number\" },",
-									"        shipDate: { type: \"string\" },",
-									"        status: { type: \"string\" },",
-									"        complete: { type: \"boolean\" }",
-									"    }",
-									"};",
-									"    const expectedOrderId = Number(pm.collectionVariables.get(\"dynamicOrderId\"));",
-									"",
-									"    // Act",
-									"    const responseBody = pm.response.json();",
-									"",
-									"    // Assert",
-									"    pm.response.to.have.jsonSchema(responseSchema);",
-									"    pm.expect(responseBody.id).to.eql(expectedOrderId);",
-									"    pm.expect(responseBody.status).to.eql(\"placed\");",
-									"    pm.expect(responseBody.complete).to.eql(true);",
-									"});"
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"method": "POST",
-						"header": [
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							},
-							{
-								"key": "Accept",
-								"value": "application/json"
-							}
-						],
-						"url": {
-							"raw": "{{baseUrl}}/store/order",
-							"host": [
-								"{{baseUrl}}"
-							],
-							"path": [
-								"store",
-								"order"
-							]
-						},
-						"body": {
-							"mode": "raw",
-							"raw": "{\n  \"id\": {{dynamicOrderId}},\n  \"petId\": {{dynamicPetId}},\n  \"quantity\": 1,\n  \"shipDate\": \"2026-05-21T00:00:00.000Z\",\n  \"status\": \"placed\",\n  \"complete\": true\n}",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Get created order by ID",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"pm.test(\"Status code is 200\", function () {",
-									"    // Arrange",
-									"    const expectedStatusCode = 200;",
-									"",
-									"    // Act",
-									"    const actualStatusCode = pm.response.code;",
-									"",
-									"    // Assert",
-									"    pm.expect(actualStatusCode).to.eql(expectedStatusCode);",
-									"});",
-									"",
-									"pm.test(\"Response time is less than 3000ms\", function () {",
-									"    // Arrange",
-									"    const maxResponseTime = 3000;",
-									"",
-									"    // Act",
-									"    const actualResponseTime = pm.response.responseTime;",
-									"",
-									"    // Assert",
-									"    pm.expect(actualResponseTime).to.be.below(maxResponseTime);",
-									"});",
-									"",
-									"pm.test(\"Created order can be retrieved\", function () {",
-									"    // Arrange",
-									"    const responseSchema = {",
-									"    type: \"object\",",
-									"    required: [\"id\", \"petId\", \"quantity\", \"shipDate\", \"status\", \"complete\"],",
-									"    additionalProperties: false,",
-									"    properties: {",
-									"        id: { type: \"number\" },",
-									"        petId: { type: \"number\" },",
-									"        quantity: { type: \"number\" },",
-									"        shipDate: { type: \"string\" },",
-									"        status: { type: \"string\" },",
-									"        complete: { type: \"boolean\" }",
-									"    }",
-									"};",
-									"    const expectedOrderId = Number(pm.collectionVariables.get(\"dynamicOrderId\"));",
-									"",
-									"    // Act",
-									"    const responseBody = pm.response.json();",
-									"",
-									"    // Assert",
-									"    pm.response.to.have.jsonSchema(responseSchema);",
-									"    pm.expect(responseBody.id).to.eql(expectedOrderId);",
-									"});"
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"method": "GET",
-						"header": [
-							{
-								"key": "Accept",
-								"value": "application/json"
-							}
-						],
-						"url": {
-							"raw": "{{baseUrl}}/store/order/:orderId",
-							"host": [
-								"{{baseUrl}}"
-							],
-							"path": [
-								"store",
-								"order",
-								":orderId"
-							],
-							"variable": [
-								{
-									"key": "orderId",
-									"value": "{{dynamicOrderId}}",
-									"description": "Dynamic order id created during the collection run"
-								}
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Get order by invalid ID type",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"pm.test(\"Status code is 404\", function () {",
-									"    // Arrange",
-									"    const expectedStatusCode = 404;",
-									"",
-									"    // Act",
-									"    const actualStatusCode = pm.response.code;",
-									"",
-									"    // Assert",
-									"    pm.expect(actualStatusCode).to.eql(expectedStatusCode);",
-									"});",
-									"",
-									"pm.test(\"Response time is less than 3000ms\", function () {",
-									"    // Arrange",
-									"    const maxResponseTime = 3000;",
-									"",
-									"    // Act",
-									"    const actualResponseTime = pm.response.responseTime;",
-									"",
-									"    // Assert",
-									"    pm.expect(actualResponseTime).to.be.below(maxResponseTime);",
-									"});",
-									"",
-									"pm.test(\"Invalid order id returns API error schema\", function () {",
-									"    // Arrange",
-									"    const responseSchema = {",
-									"    type: \"object\",",
-									"    required: [\"code\", \"type\", \"message\"],",
-									"    additionalProperties: false,",
-									"    properties: {",
-									"        code: { type: \"number\" },",
-									"        type: { type: \"string\" },",
-									"        message: { type: \"string\" }",
-									"    }",
-									"};",
-									"",
-									"    // Act",
-									"    const responseBody = pm.response.json();",
-									"",
-									"    // Assert",
-									"    pm.response.to.have.jsonSchema(responseSchema);",
-									"    pm.expect(responseBody.message).to.include(\"NumberFormatException\");",
-									"});"
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"method": "GET",
-						"header": [
-							{
-								"key": "Accept",
-								"value": "application/json"
-							}
-						],
-						"url": {
-							"raw": "{{baseUrl}}/store/order/abc",
-							"host": [
-								"{{baseUrl}}"
-							],
-							"path": [
-								"store",
-								"order",
-								"abc"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Create order with malformed JSON",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"pm.test(\"Status code is 400\", function () {",
-									"    // Arrange",
-									"    const expectedStatusCode = 400;",
-									"",
-									"    // Act",
-									"    const actualStatusCode = pm.response.code;",
-									"",
-									"    // Assert",
-									"    pm.expect(actualStatusCode).to.eql(expectedStatusCode);",
-									"});",
-									"",
-									"pm.test(\"Response time is less than 3000ms\", function () {",
-									"    // Arrange",
-									"    const maxResponseTime = 3000;",
-									"",
-									"    // Act",
-									"    const actualResponseTime = pm.response.responseTime;",
-									"",
-									"    // Assert",
-									"    pm.expect(actualResponseTime).to.be.below(maxResponseTime);",
-									"});",
-									"",
-									"pm.test(\"Malformed order JSON returns API error schema\", function () {",
-									"    // Arrange",
-									"    const responseSchema = {",
-									"    type: \"object\",",
-									"    required: [\"code\", \"type\", \"message\"],",
-									"    additionalProperties: false,",
-									"    properties: {",
-									"        code: { type: \"number\" },",
-									"        type: { type: \"string\" },",
-									"        message: { type: \"string\" }",
-									"    }",
-									"};",
-									"",
-									"    // Act",
-									"    const responseBody = pm.response.json();",
-									"",
-									"    // Assert",
-									"    pm.response.to.have.jsonSchema(responseSchema);",
-									"    pm.expect(responseBody.message).to.eql(\"bad input\");",
-									"});"
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"method": "POST",
-						"header": [
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							},
-							{
-								"key": "Accept",
-								"value": "application/json"
-							}
-						],
-						"url": {
-							"raw": "{{baseUrl}}/store/order",
-							"host": [
-								"{{baseUrl}}"
-							],
-							"path": [
-								"store",
-								"order"
-							]
-						},
-						"body": {
-							"mode": "raw",
-							"raw": "{bad json",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Delete created order",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"pm.test(\"Status code is 200\", function () {",
-									"    // Arrange",
-									"    const expectedStatusCode = 200;",
-									"",
-									"    // Act",
-									"    const actualStatusCode = pm.response.code;",
-									"",
-									"    // Assert",
-									"    pm.expect(actualStatusCode).to.eql(expectedStatusCode);",
-									"});",
-									"",
-									"pm.test(\"Response time is less than 3000ms\", function () {",
-									"    // Arrange",
-									"    const maxResponseTime = 3000;",
-									"",
-									"    // Act",
-									"    const actualResponseTime = pm.response.responseTime;",
-									"",
-									"    // Assert",
-									"    pm.expect(actualResponseTime).to.be.below(maxResponseTime);",
-									"});",
-									"",
-									"pm.test(\"Delete response references dynamic order id\", function () {",
-									"    // Arrange",
-									"    const responseSchema = {",
-									"    type: \"object\",",
-									"    required: [\"code\", \"type\", \"message\"],",
-									"    additionalProperties: false,",
-									"    properties: {",
-									"        code: { type: \"number\" },",
-									"        type: { type: \"string\" },",
-									"        message: { type: \"string\" }",
-									"    }",
-									"};",
-									"    const expectedMessage = pm.collectionVariables.get(\"dynamicOrderId\");",
-									"",
-									"    // Act",
-									"    const responseBody = pm.response.json();",
-									"",
-									"    // Assert",
-									"    pm.response.to.have.jsonSchema(responseSchema);",
-									"    pm.expect(String(responseBody.message)).to.eql(String(expectedMessage));",
-									"});"
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"method": "DELETE",
-						"header": [
-							{
-								"key": "Accept",
-								"value": "application/json"
-							}
-						],
-						"url": {
-							"raw": "{{baseUrl}}/store/order/:orderId",
-							"host": [
-								"{{baseUrl}}"
-							],
-							"path": [
-								"store",
-								"order",
-								":orderId"
-							],
-							"variable": [
-								{
-									"key": "orderId",
-									"value": "{{dynamicOrderId}}",
-									"description": "Dynamic order id created during the collection run"
-								}
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Get deleted order by ID",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"pm.test(\"Status code is 404\", function () {",
-									"    // Arrange",
-									"    const expectedStatusCode = 404;",
-									"",
-									"    // Act",
-									"    const actualStatusCode = pm.response.code;",
-									"",
-									"    // Assert",
-									"    pm.expect(actualStatusCode).to.eql(expectedStatusCode);",
-									"});",
-									"",
-									"pm.test(\"Response time is less than 3000ms\", function () {",
-									"    // Arrange",
-									"    const maxResponseTime = 3000;",
-									"",
-									"    // Act",
-									"    const actualResponseTime = pm.response.responseTime;",
-									"",
-									"    // Assert",
-									"    pm.expect(actualResponseTime).to.be.below(maxResponseTime);",
-									"});",
-									"",
-									"pm.test(\"Deleted order returns API error schema\", function () {",
-									"    // Arrange",
-									"    const responseSchema = {",
-									"    type: \"object\",",
-									"    required: [\"code\", \"type\", \"message\"],",
-									"    additionalProperties: false,",
-									"    properties: {",
-									"        code: { type: \"number\" },",
-									"        type: { type: \"string\" },",
-									"        message: { type: \"string\" }",
-									"    }",
-									"};",
-									"",
-									"    // Act",
-									"    const responseBody = pm.response.json();",
-									"",
-									"    // Assert",
-									"    pm.response.to.have.jsonSchema(responseSchema);",
-									"    pm.expect(responseBody.message).to.eql(\"Order not found\");",
-									"    pm.collectionVariables.unset(\"dynamicOrderId\");",
-									"    pm.collectionVariables.unset(\"dynamicPetIdForOrder\");",
-									"});"
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"method": "GET",
-						"header": [
-							{
-								"key": "Accept",
-								"value": "application/json"
-							}
-						],
-						"url": {
-							"raw": "{{baseUrl}}/store/order/:orderId",
-							"host": [
-								"{{baseUrl}}"
-							],
-							"path": [
-								"store",
-								"order",
-								":orderId"
-							],
-							"variable": [
-								{
-									"key": "orderId",
-									"value": "{{dynamicOrderId}}",
-									"description": "Dynamic order id created during the collection run"
-								}
-							]
-						}
-					},
-					"response": []
-				}
-			]
-		},
-		{
-			"name": "user",
-			"item": [
-				{
-					"name": "Create dynamic user",
-					"event": [
-						{
-							"listen": "prerequest",
-							"script": {
-								"exec": [
-									"const suffix = Math.floor(Math.random() * 10000000);",
-									"pm.collectionVariables.set(\"dynamicUserId\", suffix);",
-									"pm.collectionVariables.set(\"dynamicUsername\", \"codex_user_\" + suffix);"
-								],
-								"type": "text/javascript"
-							}
-						},
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"pm.test(\"Status code is 200\", function () {",
-									"    // Arrange",
-									"    const expectedStatusCode = 200;",
-									"",
-									"    // Act",
-									"    const actualStatusCode = pm.response.code;",
-									"",
-									"    // Assert",
-									"    pm.expect(actualStatusCode).to.eql(expectedStatusCode);",
-									"});",
-									"",
-									"pm.test(\"Response time is less than 3000ms\", function () {",
-									"    // Arrange",
-									"    const maxResponseTime = 3000;",
-									"",
-									"    // Act",
-									"    const actualResponseTime = pm.response.responseTime;",
-									"",
-									"    // Assert",
-									"    pm.expect(actualResponseTime).to.be.below(maxResponseTime);",
-									"});",
-									"",
-									"pm.test(\"Create user response references dynamic user id\", function () {",
-									"    // Arrange",
-									"    const responseSchema = {",
-									"    type: \"object\",",
-									"    required: [\"code\", \"type\", \"message\"],",
-									"    additionalProperties: false,",
-									"    properties: {",
-									"        code: { type: \"number\" },",
-									"        type: { type: \"string\" },",
-									"        message: { type: \"string\" }",
-									"    }",
-									"};",
-									"    const expectedMessage = pm.collectionVariables.get(\"dynamicUserId\");",
-									"",
-									"    // Act",
-									"    const responseBody = pm.response.json();",
-									"",
-									"    // Assert",
-									"    pm.response.to.have.jsonSchema(responseSchema);",
-									"    pm.expect(String(responseBody.message)).to.eql(String(expectedMessage));",
-									"});"
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"method": "POST",
-						"header": [
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							},
-							{
-								"key": "Accept",
-								"value": "application/json"
-							}
-						],
-						"url": {
-							"raw": "{{baseUrl}}/user",
-							"host": [
-								"{{baseUrl}}"
-							],
-							"path": [
-								"user"
-							]
-						},
-						"body": {
-							"mode": "raw",
-							"raw": "{\n  \"id\": {{dynamicUserId}},\n  \"username\": \"{{dynamicUsername}}\",\n  \"firstName\": \"Codex\",\n  \"lastName\": \"QA\",\n  \"email\": \"{{dynamicUsername}}@example.com\",\n  \"password\": \"pass123\",\n  \"phone\": \"1234567890\",\n  \"userStatus\": 1\n}",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Get created user by username",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"pm.test(\"Status code is 200\", function () {",
-									"    // Arrange",
-									"    const expectedStatusCode = 200;",
-									"",
-									"    // Act",
-									"    const actualStatusCode = pm.response.code;",
-									"",
-									"    // Assert",
-									"    pm.expect(actualStatusCode).to.eql(expectedStatusCode);",
-									"});",
-									"",
-									"pm.test(\"Response time is less than 3000ms\", function () {",
-									"    // Arrange",
-									"    const maxResponseTime = 3000;",
-									"",
-									"    // Act",
-									"    const actualResponseTime = pm.response.responseTime;",
-									"",
-									"    // Assert",
-									"    pm.expect(actualResponseTime).to.be.below(maxResponseTime);",
-									"});",
-									"",
-									"pm.test(\"Created user can be retrieved\", function () {",
-									"    // Arrange",
-									"    const responseSchema = {",
-									"    type: \"object\",",
-									"    required: [\"id\", \"username\", \"firstName\", \"lastName\", \"email\", \"password\", \"phone\", \"userStatus\"],",
-									"    additionalProperties: false,",
-									"    properties: {",
-									"        id: { type: \"number\" },",
-									"        username: { type: \"string\" },",
-									"        firstName: { type: \"string\" },",
-									"        lastName: { type: \"string\" },",
-									"        email: { type: \"string\" },",
-									"        password: { type: \"string\" },",
-									"        phone: { type: \"string\" },",
-									"        userStatus: { type: \"number\" }",
-									"    }",
-									"};",
-									"    const expectedUserId = Number(pm.collectionVariables.get(\"dynamicUserId\"));",
-									"    const expectedUsername = pm.collectionVariables.get(\"dynamicUsername\");",
-									"",
-									"    // Act",
-									"    const responseBody = pm.response.json();",
-									"",
-									"    // Assert",
-									"    pm.response.to.have.jsonSchema(responseSchema);",
-									"    pm.expect(responseBody.id).to.eql(expectedUserId);",
-									"    pm.expect(responseBody.username).to.eql(expectedUsername);",
-									"    pm.expect(responseBody.firstName).to.eql(\"Codex\");",
-									"});"
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"method": "GET",
-						"header": [
-							{
-								"key": "Accept",
-								"value": "application/json"
-							}
-						],
-						"url": {
-							"raw": "{{baseUrl}}/user/:username",
-							"host": [
-								"{{baseUrl}}"
-							],
-							"path": [
-								"user",
-								":username"
-							],
-							"variable": [
-								{
-									"key": "username",
-									"value": "{{dynamicUsername}}",
-									"description": "Dynamic username created during the collection run"
-								}
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Update created user",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"pm.test(\"Status code is 200\", function () {",
-									"    // Arrange",
-									"    const expectedStatusCode = 200;",
-									"",
-									"    // Act",
-									"    const actualStatusCode = pm.response.code;",
-									"",
-									"    // Assert",
-									"    pm.expect(actualStatusCode).to.eql(expectedStatusCode);",
-									"});",
-									"",
-									"pm.test(\"Response time is less than 3000ms\", function () {",
-									"    // Arrange",
-									"    const maxResponseTime = 3000;",
-									"",
-									"    // Act",
-									"    const actualResponseTime = pm.response.responseTime;",
-									"",
-									"    // Assert",
-									"    pm.expect(actualResponseTime).to.be.below(maxResponseTime);",
-									"});",
-									"",
-									"pm.test(\"Update user response references dynamic user id\", function () {",
-									"    // Arrange",
-									"    const responseSchema = {",
-									"    type: \"object\",",
-									"    required: [\"code\", \"type\", \"message\"],",
-									"    additionalProperties: false,",
-									"    properties: {",
-									"        code: { type: \"number\" },",
-									"        type: { type: \"string\" },",
-									"        message: { type: \"string\" }",
-									"    }",
-									"};",
-									"    const expectedMessage = pm.collectionVariables.get(\"dynamicUserId\");",
-									"",
-									"    // Act",
-									"    const responseBody = pm.response.json();",
-									"",
-									"    // Assert",
-									"    pm.response.to.have.jsonSchema(responseSchema);",
-									"    pm.expect(String(responseBody.message)).to.eql(String(expectedMessage));",
-									"});"
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"method": "PUT",
-						"header": [
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							},
-							{
-								"key": "Accept",
-								"value": "application/json"
-							}
-						],
-						"url": {
-							"raw": "{{baseUrl}}/user/:username",
-							"host": [
-								"{{baseUrl}}"
-							],
-							"path": [
-								"user",
-								":username"
-							],
-							"variable": [
-								{
-									"key": "username",
-									"value": "{{dynamicUsername}}",
-									"description": "Dynamic username created during the collection run"
-								}
-							]
-						},
-						"body": {
-							"mode": "raw",
-							"raw": "{\n  \"id\": {{dynamicUserId}},\n  \"username\": \"{{dynamicUsername}}\",\n  \"firstName\": \"UpdatedCodex\",\n  \"lastName\": \"QA\",\n  \"email\": \"updated_{{dynamicUsername}}@example.com\",\n  \"password\": \"pass123\",\n  \"phone\": \"1234567890\",\n  \"userStatus\": 1\n}",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Get updated user by username",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"pm.test(\"Status code is 200\", function () {",
-									"    // Arrange",
-									"    const expectedStatusCode = 200;",
-									"",
-									"    // Act",
-									"    const actualStatusCode = pm.response.code;",
-									"",
-									"    // Assert",
-									"    pm.expect(actualStatusCode).to.eql(expectedStatusCode);",
-									"});",
-									"",
-									"pm.test(\"Response time is less than 3000ms\", function () {",
-									"    // Arrange",
-									"    const maxResponseTime = 3000;",
-									"",
-									"    // Act",
-									"    const actualResponseTime = pm.response.responseTime;",
-									"",
-									"    // Assert",
-									"    pm.expect(actualResponseTime).to.be.below(maxResponseTime);",
-									"});",
-									"",
-									"pm.test(\"Updated user can be retrieved\", function () {",
-									"    // Arrange",
-									"    const responseSchema = {",
-									"    type: \"object\",",
-									"    required: [\"id\", \"username\", \"firstName\", \"lastName\", \"email\", \"password\", \"phone\", \"userStatus\"],",
-									"    additionalProperties: false,",
-									"    properties: {",
-									"        id: { type: \"number\" },",
-									"        username: { type: \"string\" },",
-									"        firstName: { type: \"string\" },",
-									"        lastName: { type: \"string\" },",
-									"        email: { type: \"string\" },",
-									"        password: { type: \"string\" },",
-									"        phone: { type: \"string\" },",
-									"        userStatus: { type: \"number\" }",
-									"    }",
-									"};",
-									"    const expectedUserId = Number(pm.collectionVariables.get(\"dynamicUserId\"));",
-									"    const expectedUsername = pm.collectionVariables.get(\"dynamicUsername\");",
-									"",
-									"    // Act",
-									"    const responseBody = pm.response.json();",
-									"",
-									"    // Assert",
-									"    pm.response.to.have.jsonSchema(responseSchema);",
-									"    pm.expect(responseBody.id).to.eql(expectedUserId);",
-									"    pm.expect(responseBody.username).to.eql(expectedUsername);",
-									"    pm.expect(responseBody.firstName).to.eql(\"UpdatedCodex\");",
-									"    pm.expect(responseBody.email).to.eql(\"updated_\" + expectedUsername + \"@example.com\");",
-									"});"
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"method": "GET",
-						"header": [
-							{
-								"key": "Accept",
-								"value": "application/json"
-							}
-						],
-						"url": {
-							"raw": "{{baseUrl}}/user/:username",
-							"host": [
-								"{{baseUrl}}"
-							],
-							"path": [
-								"user",
-								":username"
-							],
-							"variable": [
-								{
-									"key": "username",
-									"value": "{{dynamicUsername}}",
-									"description": "Dynamic username created during the collection run"
-								}
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Get missing user by username",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"pm.test(\"Status code is 404\", function () {",
-									"    // Arrange",
-									"    const expectedStatusCode = 404;",
-									"",
-									"    // Act",
-									"    const actualStatusCode = pm.response.code;",
-									"",
-									"    // Assert",
-									"    pm.expect(actualStatusCode).to.eql(expectedStatusCode);",
-									"});",
-									"",
-									"pm.test(\"Response time is less than 3000ms\", function () {",
-									"    // Arrange",
-									"    const maxResponseTime = 3000;",
-									"",
-									"    // Act",
-									"    const actualResponseTime = pm.response.responseTime;",
-									"",
-									"    // Assert",
-									"    pm.expect(actualResponseTime).to.be.below(maxResponseTime);",
-									"});",
-									"",
-									"pm.test(\"Missing user returns API error schema\", function () {",
-									"    // Arrange",
-									"    const responseSchema = {",
-									"    type: \"object\",",
-									"    required: [\"code\", \"type\", \"message\"],",
-									"    additionalProperties: false,",
-									"    properties: {",
-									"        code: { type: \"number\" },",
-									"        type: { type: \"string\" },",
-									"        message: { type: \"string\" }",
-									"    }",
-									"};",
-									"",
-									"    // Act",
-									"    const responseBody = pm.response.json();",
-									"",
-									"    // Assert",
-									"    pm.response.to.have.jsonSchema(responseSchema);",
-									"    pm.expect(responseBody.message).to.eql(\"User not found\");",
-									"});"
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"method": "GET",
-						"header": [
-							{
-								"key": "Accept",
-								"value": "application/json"
-							}
-						],
-						"url": {
-							"raw": "{{baseUrl}}/user/no_such_user_codex_999999",
-							"host": [
-								"{{baseUrl}}"
-							],
-							"path": [
-								"user",
-								"no_such_user_codex_999999"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Create user with malformed JSON",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"pm.test(\"Status code is 400\", function () {",
-									"    // Arrange",
-									"    const expectedStatusCode = 400;",
-									"",
-									"    // Act",
-									"    const actualStatusCode = pm.response.code;",
-									"",
-									"    // Assert",
-									"    pm.expect(actualStatusCode).to.eql(expectedStatusCode);",
-									"});",
-									"",
-									"pm.test(\"Response time is less than 3000ms\", function () {",
-									"    // Arrange",
-									"    const maxResponseTime = 3000;",
-									"",
-									"    // Act",
-									"    const actualResponseTime = pm.response.responseTime;",
-									"",
-									"    // Assert",
-									"    pm.expect(actualResponseTime).to.be.below(maxResponseTime);",
-									"});",
-									"",
-									"pm.test(\"Malformed user JSON returns API error schema\", function () {",
-									"    // Arrange",
-									"    const responseSchema = {",
-									"    type: \"object\",",
-									"    required: [\"code\", \"type\", \"message\"],",
-									"    additionalProperties: false,",
-									"    properties: {",
-									"        code: { type: \"number\" },",
-									"        type: { type: \"string\" },",
-									"        message: { type: \"string\" }",
-									"    }",
-									"};",
-									"",
-									"    // Act",
-									"    const responseBody = pm.response.json();",
-									"",
-									"    // Assert",
-									"    pm.response.to.have.jsonSchema(responseSchema);",
-									"    pm.expect(responseBody.message).to.eql(\"bad input\");",
-									"});"
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"method": "POST",
-						"header": [
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							},
-							{
-								"key": "Accept",
-								"value": "application/json"
-							}
-						],
-						"url": {
-							"raw": "{{baseUrl}}/user",
-							"host": [
-								"{{baseUrl}}"
-							],
-							"path": [
-								"user"
-							]
-						},
-						"body": {
-							"mode": "raw",
-							"raw": "{bad json",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Update user with malformed JSON",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"pm.test(\"Status code is 400\", function () {",
-									"    // Arrange",
-									"    const expectedStatusCode = 400;",
-									"",
-									"    // Act",
-									"    const actualStatusCode = pm.response.code;",
-									"",
-									"    // Assert",
-									"    pm.expect(actualStatusCode).to.eql(expectedStatusCode);",
-									"});",
-									"",
-									"pm.test(\"Response time is less than 3000ms\", function () {",
-									"    // Arrange",
-									"    const maxResponseTime = 3000;",
-									"",
-									"    // Act",
-									"    const actualResponseTime = pm.response.responseTime;",
-									"",
-									"    // Assert",
-									"    pm.expect(actualResponseTime).to.be.below(maxResponseTime);",
-									"});",
-									"",
-									"pm.test(\"Malformed user update JSON returns API error schema\", function () {",
-									"    // Arrange",
-									"    const responseSchema = {",
-									"    type: \"object\",",
-									"    required: [\"code\", \"type\", \"message\"],",
-									"    additionalProperties: false,",
-									"    properties: {",
-									"        code: { type: \"number\" },",
-									"        type: { type: \"string\" },",
-									"        message: { type: \"string\" }",
-									"    }",
-									"};",
-									"",
-									"    // Act",
-									"    const responseBody = pm.response.json();",
-									"",
-									"    // Assert",
-									"    pm.response.to.have.jsonSchema(responseSchema);",
-									"    pm.expect(responseBody.message).to.eql(\"bad input\");",
-									"});"
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"method": "PUT",
-						"header": [
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							},
-							{
-								"key": "Accept",
-								"value": "application/json"
-							}
-						],
-						"url": {
-							"raw": "{{baseUrl}}/user/:username",
-							"host": [
-								"{{baseUrl}}"
-							],
-							"path": [
-								"user",
-								":username"
-							],
-							"variable": [
-								{
-									"key": "username",
-									"value": "{{dynamicUsername}}",
-									"description": "Dynamic username created during the collection run"
-								}
-							]
-						},
-						"body": {
-							"mode": "raw",
-							"raw": "{bad json",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Delete created user",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"pm.test(\"Status code is 200\", function () {",
-									"    // Arrange",
-									"    const expectedStatusCode = 200;",
-									"",
-									"    // Act",
-									"    const actualStatusCode = pm.response.code;",
-									"",
-									"    // Assert",
-									"    pm.expect(actualStatusCode).to.eql(expectedStatusCode);",
-									"});",
-									"",
-									"pm.test(\"Response time is less than 3000ms\", function () {",
-									"    // Arrange",
-									"    const maxResponseTime = 3000;",
-									"",
-									"    // Act",
-									"    const actualResponseTime = pm.response.responseTime;",
-									"",
-									"    // Assert",
-									"    pm.expect(actualResponseTime).to.be.below(maxResponseTime);",
-									"});",
-									"",
-									"pm.test(\"Delete response references dynamic username\", function () {",
-									"    // Arrange",
-									"    const responseSchema = {",
-									"    type: \"object\",",
-									"    required: [\"code\", \"type\", \"message\"],",
-									"    additionalProperties: false,",
-									"    properties: {",
-									"        code: { type: \"number\" },",
-									"        type: { type: \"string\" },",
-									"        message: { type: \"string\" }",
-									"    }",
-									"};",
-									"    const expectedMessage = pm.collectionVariables.get(\"dynamicUsername\");",
-									"",
-									"    // Act",
-									"    const responseBody = pm.response.json();",
-									"",
-									"    // Assert",
-									"    pm.response.to.have.jsonSchema(responseSchema);",
-									"    pm.expect(String(responseBody.message)).to.eql(String(expectedMessage));",
-									"});"
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"method": "DELETE",
-						"header": [
-							{
-								"key": "Accept",
-								"value": "application/json"
-							}
-						],
-						"url": {
-							"raw": "{{baseUrl}}/user/:username",
-							"host": [
-								"{{baseUrl}}"
-							],
-							"path": [
-								"user",
-								":username"
-							],
-							"variable": [
-								{
-									"key": "username",
-									"value": "{{dynamicUsername}}",
-									"description": "Dynamic username created during the collection run"
-								}
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Get deleted user by username",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"pm.test(\"Status code is 404\", function () {",
-									"    // Arrange",
-									"    const expectedStatusCode = 404;",
-									"",
-									"    // Act",
-									"    const actualStatusCode = pm.response.code;",
-									"",
-									"    // Assert",
-									"    pm.expect(actualStatusCode).to.eql(expectedStatusCode);",
-									"});",
-									"",
-									"pm.test(\"Response time is less than 3000ms\", function () {",
-									"    // Arrange",
-									"    const maxResponseTime = 3000;",
-									"",
-									"    // Act",
-									"    const actualResponseTime = pm.response.responseTime;",
-									"",
-									"    // Assert",
-									"    pm.expect(actualResponseTime).to.be.below(maxResponseTime);",
-									"});",
-									"",
-									"pm.test(\"Deleted user returns API error schema\", function () {",
-									"    // Arrange",
-									"    const responseSchema = {",
-									"    type: \"object\",",
-									"    required: [\"code\", \"type\", \"message\"],",
-									"    additionalProperties: false,",
-									"    properties: {",
-									"        code: { type: \"number\" },",
-									"        type: { type: \"string\" },",
-									"        message: { type: \"string\" }",
-									"    }",
-									"};",
-									"",
-									"    // Act",
-									"    const responseBody = pm.response.json();",
-									"",
-									"    // Assert",
-									"    pm.response.to.have.jsonSchema(responseSchema);",
-									"    pm.expect(responseBody.message).to.eql(\"User not found\");",
-									"    pm.collectionVariables.unset(\"dynamicUserId\");",
-									"    pm.collectionVariables.unset(\"dynamicUsername\");",
-									"});"
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"method": "GET",
-						"header": [
-							{
-								"key": "Accept",
-								"value": "application/json"
-							}
-						],
-						"url": {
-							"raw": "{{baseUrl}}/user/:username",
-							"host": [
-								"{{baseUrl}}"
-							],
-							"path": [
-								"user",
-								":username"
-							],
-							"variable": [
-								{
-									"key": "username",
-									"value": "{{dynamicUsername}}",
-									"description": "Dynamic username created during the collection run"
-								}
-							]
-						}
-					},
-					"response": []
-				}
-			]
-		}
-	],
-	"variable": [
-		{
-			"key": "baseUrl",
-			"value": "https://petstore.swagger.io/v2",
-			"type": "string"
-		},
-		{
-			"key": "dynamicPetId",
-			"value": "",
-			"type": "string"
-		},
-		{
-			"key": "dynamicOrderId",
-			"value": "",
-			"type": "string"
-		},
-		{
-			"key": "dynamicPetIdForOrder",
-			"value": "",
-			"type": "string"
-		},
-		{
-			"key": "dynamicUserId",
-			"value": "",
-			"type": "string"
-		},
-		{
-			"key": "dynamicUsername",
-			"value": "",
-			"type": "string"
-		}
-	]
+  "info": {
+    "_postman_id": "4a0f5191-a707-404b-9e37-a6711475a264",
+    "name": "petstore",
+    "description": "This is a sample server Petstore server. For this sample, you can use the api key `special-key` to test the authorization filters.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "18317683"
+  },
+  "item": [
+    {
+      "name": "pet",
+      "item": [
+        {
+          "name": "Create dynamic pet",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "exec": [
+                  "pm.variables.set(\"expectedStatusCode\", \"200\");",
+                  "pm.variables.set(\"expectedMaxResponseTimeMs\", \"3000\");",
+                  "pm.variables.set(\"expectJsonResponse\", \"true\");",
+                  "const dynamicPetId = Math.floor(Math.random() * 10000000) + 1000000;",
+                  "pm.collectionVariables.set(\"dynamicPetId\", dynamicPetId);"
+                ],
+                "type": "text/javascript"
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var responseBody = pm.response.json();",
+                  "pm.test(\"Created pet matches strict schema and dynamic id\", function () {",
+                  "    // Arrange",
+                  "    var responseSchema = JSON.parse(pm.collectionVariables.get(\"_petstoreSchema001\"));",
+                  "    const expectedId = Number(pm.collectionVariables.get(\"dynamicPetId\"));",
+                  "",
+                  "    // Act",
+                  "",
+                  "    // Assert",
+                  "    pm.response.to.have.jsonSchema(responseSchema);",
+                  "    pm.expect(responseBody.id).to.eql(expectedId);",
+                  "    pm.expect(responseBody.name).to.eql(\"NewmanDog\");",
+                  "    pm.expect(responseBody.status).to.eql(\"available\");",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/pet",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "pet"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"id\": {{dynamicPetId}},\n  \"category\": { \"id\": 1, \"name\": \"Dogs\" },\n  \"name\": \"NewmanDog\",\n  \"photoUrls\": [\"https://example.com/dog.jpg\"],\n  \"tags\": [{ \"id\": 1, \"name\": \"Large\" }],\n  \"status\": \"available\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get created pet by ID",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var responseBody = pm.response.json();",
+                  "pm.test(\"Created pet can be retrieved\", function () {",
+                  "    // Arrange",
+                  "    var responseSchema = JSON.parse(pm.collectionVariables.get(\"_petstoreSchema001\"));",
+                  "    const expectedId = Number(pm.collectionVariables.get(\"dynamicPetId\"));",
+                  "",
+                  "    // Act",
+                  "",
+                  "    // Assert",
+                  "    pm.response.to.have.jsonSchema(responseSchema);",
+                  "    pm.expect(responseBody.id).to.eql(expectedId);",
+                  "    pm.expect(responseBody.name).to.eql(\"NewmanDog\");",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            },
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.variables.set(\"expectedStatusCode\", \"200\");",
+                  "pm.variables.set(\"expectedMaxResponseTimeMs\", \"3000\");",
+                  "pm.variables.set(\"expectJsonResponse\", \"true\");"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/pet/:petId",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "pet",
+                ":petId"
+              ],
+              "variable": [
+                {
+                  "key": "petId",
+                  "value": "{{dynamicPetId}}",
+                  "description": "Dynamic pet id created during the collection run"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Update created pet with form data",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var responseBody = pm.response.json();",
+                  "pm.test(\"Update response references dynamic pet id\", function () {",
+                  "    // Arrange",
+                  "    var responseSchema = JSON.parse(pm.collectionVariables.get(\"_apiResponseSchema\"));",
+                  "    const expectedMessage = pm.collectionVariables.get(\"dynamicPetId\");",
+                  "",
+                  "    // Act",
+                  "",
+                  "    // Assert",
+                  "    pm.response.to.have.jsonSchema(responseSchema);",
+                  "    pm.expect(String(responseBody.message)).to.eql(String(expectedMessage));",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            },
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.variables.set(\"expectedStatusCode\", \"200\");",
+                  "pm.variables.set(\"expectedMaxResponseTimeMs\", \"3000\");",
+                  "pm.variables.set(\"expectJsonResponse\", \"true\");"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/x-www-form-urlencoded"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/pet/:petId",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "pet",
+                ":petId"
+              ],
+              "variable": [
+                {
+                  "key": "petId",
+                  "value": "{{dynamicPetId}}",
+                  "description": "Dynamic pet id created during the collection run"
+                }
+              ]
+            },
+            "body": {
+              "mode": "urlencoded",
+              "urlencoded": [
+                {
+                  "key": "name",
+                  "value": "UpdatedNewmanDog",
+                  "type": "text"
+                },
+                {
+                  "key": "status",
+                  "value": "sold",
+                  "type": "text"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get updated pet by ID",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var responseBody = pm.response.json();",
+                  "pm.test(\"Updated pet can be retrieved\", function () {",
+                  "    // Arrange",
+                  "    var responseSchema = JSON.parse(pm.collectionVariables.get(\"_petstoreSchema001\"));",
+                  "    const expectedId = Number(pm.collectionVariables.get(\"dynamicPetId\"));",
+                  "",
+                  "    // Act",
+                  "",
+                  "    // Assert",
+                  "    pm.response.to.have.jsonSchema(responseSchema);",
+                  "    pm.expect(responseBody.id).to.eql(expectedId);",
+                  "    pm.expect(responseBody.name).to.eql(\"UpdatedNewmanDog\");",
+                  "    pm.expect(responseBody.status).to.eql(\"sold\");",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            },
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.variables.set(\"expectedStatusCode\", \"200\");",
+                  "pm.variables.set(\"expectedMaxResponseTimeMs\", \"3000\");",
+                  "pm.variables.set(\"expectJsonResponse\", \"true\");"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/pet/:petId",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "pet",
+                ":petId"
+              ],
+              "variable": [
+                {
+                  "key": "petId",
+                  "value": "{{dynamicPetId}}",
+                  "description": "Dynamic pet id created during the collection run"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Find pets by valid status",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var responseBody = pm.response.json();",
+                  "pm.test(\"Available pets response is an array\", function () {",
+                  "    // Arrange",
+                  "    var responseSchema = JSON.parse(pm.collectionVariables.get(\"_petstoreSchema002\"));",
+                  "",
+                  "    // Act",
+                  "",
+                  "    // Assert",
+                  "    pm.response.to.have.jsonSchema(responseSchema);",
+                  "    pm.expect(responseBody).to.be.an(\"array\");",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            },
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.variables.set(\"expectedStatusCode\", \"200\");",
+                  "pm.variables.set(\"expectedMaxResponseTimeMs\", \"3000\");",
+                  "pm.variables.set(\"expectJsonResponse\", \"true\");"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/pet/findByStatus?status=available",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "pet",
+                "findByStatus"
+              ],
+              "query": [
+                {
+                  "key": "status",
+                  "value": "available"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Find pets by invalid status",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var responseBody = pm.response.json();",
+                  "pm.test(\"Invalid status returns an empty array\", function () {",
+                  "    // Arrange",
+                  "    var responseSchema = JSON.parse(pm.collectionVariables.get(\"_petstoreSchema003\"));",
+                  "",
+                  "    // Act",
+                  "",
+                  "    // Assert",
+                  "    pm.response.to.have.jsonSchema(responseSchema);",
+                  "    pm.expect(responseBody).to.eql([]);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            },
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.variables.set(\"expectedStatusCode\", \"200\");",
+                  "pm.variables.set(\"expectedMaxResponseTimeMs\", \"3000\");",
+                  "pm.variables.set(\"expectJsonResponse\", \"true\");"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/pet/findByStatus?status=invalidStatus",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "pet",
+                "findByStatus"
+              ],
+              "query": [
+                {
+                  "key": "status",
+                  "value": "invalidStatus"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Find pets by tag",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var responseBody = pm.response.json();",
+                  "pm.test(\"Tagged pets response is an array\", function () {",
+                  "    // Arrange",
+                  "    var responseSchema = JSON.parse(pm.collectionVariables.get(\"_petstoreSchema002\"));",
+                  "",
+                  "    // Act",
+                  "",
+                  "    // Assert",
+                  "    pm.response.to.have.jsonSchema(responseSchema);",
+                  "    pm.expect(responseBody).to.be.an(\"array\");",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            },
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.variables.set(\"expectedStatusCode\", \"200\");",
+                  "pm.variables.set(\"expectedMaxResponseTimeMs\", \"3000\");",
+                  "pm.variables.set(\"expectJsonResponse\", \"true\");"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/pet/findByTags?tags=Large",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "pet",
+                "findByTags"
+              ],
+              "query": [
+                {
+                  "key": "tags",
+                  "value": "Large"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get pet by invalid ID type",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var responseBody = pm.response.json();",
+                  "pm.test(\"Invalid pet id returns API error schema\", function () {",
+                  "    // Arrange",
+                  "    var responseSchema = JSON.parse(pm.collectionVariables.get(\"_apiResponseSchema\"));",
+                  "",
+                  "    // Act",
+                  "",
+                  "    // Assert",
+                  "    pm.response.to.have.jsonSchema(responseSchema);",
+                  "    pm.expect(responseBody.message).to.include(\"NumberFormatException\");",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            },
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.variables.set(\"expectedStatusCode\", \"404\");",
+                  "pm.variables.set(\"expectedMaxResponseTimeMs\", \"3000\");",
+                  "pm.variables.set(\"expectJsonResponse\", \"true\");"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/pet/abc",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "pet",
+                "abc"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get missing pet by numeric ID",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var responseBody = pm.response.json();",
+                  "pm.test(\"Missing pet returns API error schema\", function () {",
+                  "    // Arrange",
+                  "    var responseSchema = JSON.parse(pm.collectionVariables.get(\"_apiResponseSchema\"));",
+                  "",
+                  "    // Act",
+                  "",
+                  "    // Assert",
+                  "    pm.response.to.have.jsonSchema(responseSchema);",
+                  "    pm.expect(responseBody.message).to.eql(\"Pet not found\");",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            },
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.variables.set(\"expectedStatusCode\", \"404\");",
+                  "pm.variables.set(\"expectedMaxResponseTimeMs\", \"3000\");",
+                  "pm.variables.set(\"expectJsonResponse\", \"true\");"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/pet/999999999999",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "pet",
+                "999999999999"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Create pet with malformed JSON",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var responseBody = pm.response.json();",
+                  "pm.test(\"Malformed pet JSON returns API error schema\", function () {",
+                  "    // Arrange",
+                  "    var responseSchema = JSON.parse(pm.collectionVariables.get(\"_apiResponseSchema\"));",
+                  "",
+                  "    // Act",
+                  "",
+                  "    // Assert",
+                  "    pm.response.to.have.jsonSchema(responseSchema);",
+                  "    pm.expect(responseBody.message).to.eql(\"bad input\");",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            },
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.variables.set(\"expectedStatusCode\", \"400\");",
+                  "pm.variables.set(\"expectedMaxResponseTimeMs\", \"3000\");",
+                  "pm.variables.set(\"expectJsonResponse\", \"true\");"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/pet",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "pet"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{bad json",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Delete created pet",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var responseBody = pm.response.json();",
+                  "pm.test(\"Delete response references dynamic pet id\", function () {",
+                  "    // Arrange",
+                  "    var responseSchema = JSON.parse(pm.collectionVariables.get(\"_apiResponseSchema\"));",
+                  "    const expectedMessage = pm.collectionVariables.get(\"dynamicPetId\");",
+                  "",
+                  "    // Act",
+                  "",
+                  "    // Assert",
+                  "    pm.response.to.have.jsonSchema(responseSchema);",
+                  "    pm.expect(String(responseBody.message)).to.eql(String(expectedMessage));",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            },
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.variables.set(\"expectedStatusCode\", \"200\");",
+                  "pm.variables.set(\"expectedMaxResponseTimeMs\", \"3000\");",
+                  "pm.variables.set(\"expectJsonResponse\", \"true\");"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/pet/:petId",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "pet",
+                ":petId"
+              ],
+              "variable": [
+                {
+                  "key": "petId",
+                  "value": "{{dynamicPetId}}",
+                  "description": "Dynamic pet id created during the collection run"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get deleted pet by ID",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var responseBody = pm.response.json();",
+                  "pm.test(\"Deleted pet returns API error schema\", function () {",
+                  "    // Arrange",
+                  "    var responseSchema = JSON.parse(pm.collectionVariables.get(\"_apiResponseSchema\"));",
+                  "",
+                  "    // Act",
+                  "",
+                  "    // Assert",
+                  "    pm.response.to.have.jsonSchema(responseSchema);",
+                  "    pm.expect(responseBody.message).to.eql(\"Pet not found\");",
+                  "});",
+                  "",
+                  "pm.collectionVariables.unset(\"dynamicPetId\");"
+                ],
+                "type": "text/javascript"
+              }
+            },
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.variables.set(\"expectedStatusCode\", \"404\");",
+                  "pm.variables.set(\"expectedMaxResponseTimeMs\", \"3000\");",
+                  "pm.variables.set(\"expectJsonResponse\", \"true\");"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/pet/:petId",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "pet",
+                ":petId"
+              ],
+              "variable": [
+                {
+                  "key": "petId",
+                  "value": "{{dynamicPetId}}",
+                  "description": "Dynamic pet id created during the collection run"
+                }
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "store",
+      "item": [
+        {
+          "name": "Create order for dynamic pet",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "exec": [
+                  "pm.variables.set(\"expectedStatusCode\", \"200\");",
+                  "pm.variables.set(\"expectedMaxResponseTimeMs\", \"3000\");",
+                  "pm.variables.set(\"expectJsonResponse\", \"true\");",
+                  "const dynamicOrderId = Math.floor(Math.random() * 100000) + 1000;",
+                  "pm.collectionVariables.set(\"dynamicOrderId\", dynamicOrderId);",
+                  "if (!pm.collectionVariables.get(\"dynamicPetIdForOrder\")) {",
+                  "    pm.collectionVariables.set(\"dynamicPetIdForOrder\", Math.floor(Math.random() * 10000000) + 1000000);",
+                  "}",
+                  "pm.collectionVariables.set(\"dynamicPetId\", pm.collectionVariables.get(\"dynamicPetIdForOrder\"));"
+                ],
+                "type": "text/javascript"
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var responseBody = pm.response.json();",
+                  "pm.test(\"Created order matches strict schema\", function () {",
+                  "    // Arrange",
+                  "    var responseSchema = JSON.parse(pm.collectionVariables.get(\"_petstoreSchema004\"));",
+                  "    const expectedOrderId = Number(pm.collectionVariables.get(\"dynamicOrderId\"));",
+                  "",
+                  "    // Act",
+                  "",
+                  "    // Assert",
+                  "    pm.response.to.have.jsonSchema(responseSchema);",
+                  "    pm.expect(responseBody.id).to.eql(expectedOrderId);",
+                  "    pm.expect(responseBody.status).to.eql(\"placed\");",
+                  "    pm.expect(responseBody.complete).to.eql(true);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/store/order",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "store",
+                "order"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"id\": {{dynamicOrderId}},\n  \"petId\": {{dynamicPetId}},\n  \"quantity\": 1,\n  \"shipDate\": \"2026-05-21T00:00:00.000Z\",\n  \"status\": \"placed\",\n  \"complete\": true\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get created order by ID",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var responseBody = pm.response.json();",
+                  "pm.test(\"Created order can be retrieved\", function () {",
+                  "    // Arrange",
+                  "    var responseSchema = JSON.parse(pm.collectionVariables.get(\"_petstoreSchema004\"));",
+                  "    const expectedOrderId = Number(pm.collectionVariables.get(\"dynamicOrderId\"));",
+                  "",
+                  "    // Act",
+                  "",
+                  "    // Assert",
+                  "    pm.response.to.have.jsonSchema(responseSchema);",
+                  "    pm.expect(responseBody.id).to.eql(expectedOrderId);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            },
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.variables.set(\"expectedStatusCode\", \"200\");",
+                  "pm.variables.set(\"expectedMaxResponseTimeMs\", \"3000\");",
+                  "pm.variables.set(\"expectJsonResponse\", \"true\");"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/store/order/:orderId",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "store",
+                "order",
+                ":orderId"
+              ],
+              "variable": [
+                {
+                  "key": "orderId",
+                  "value": "{{dynamicOrderId}}",
+                  "description": "Dynamic order id created during the collection run"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get order by invalid ID type",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var responseBody = pm.response.json();",
+                  "pm.test(\"Invalid order id returns API error schema\", function () {",
+                  "    // Arrange",
+                  "    var responseSchema = JSON.parse(pm.collectionVariables.get(\"_apiResponseSchema\"));",
+                  "",
+                  "    // Act",
+                  "",
+                  "    // Assert",
+                  "    pm.response.to.have.jsonSchema(responseSchema);",
+                  "    pm.expect(responseBody.message).to.include(\"NumberFormatException\");",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            },
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.variables.set(\"expectedStatusCode\", \"404\");",
+                  "pm.variables.set(\"expectedMaxResponseTimeMs\", \"3000\");",
+                  "pm.variables.set(\"expectJsonResponse\", \"true\");"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/store/order/abc",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "store",
+                "order",
+                "abc"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Create order with malformed JSON",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var responseBody = pm.response.json();",
+                  "pm.test(\"Malformed order JSON returns API error schema\", function () {",
+                  "    // Arrange",
+                  "    var responseSchema = JSON.parse(pm.collectionVariables.get(\"_apiResponseSchema\"));",
+                  "",
+                  "    // Act",
+                  "",
+                  "    // Assert",
+                  "    pm.response.to.have.jsonSchema(responseSchema);",
+                  "    pm.expect(responseBody.message).to.eql(\"bad input\");",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            },
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.variables.set(\"expectedStatusCode\", \"400\");",
+                  "pm.variables.set(\"expectedMaxResponseTimeMs\", \"3000\");",
+                  "pm.variables.set(\"expectJsonResponse\", \"true\");"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/store/order",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "store",
+                "order"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{bad json",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Delete created order",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var responseBody = pm.response.json();",
+                  "pm.test(\"Delete response references dynamic order id\", function () {",
+                  "    // Arrange",
+                  "    var responseSchema = JSON.parse(pm.collectionVariables.get(\"_apiResponseSchema\"));",
+                  "    const expectedMessage = pm.collectionVariables.get(\"dynamicOrderId\");",
+                  "",
+                  "    // Act",
+                  "",
+                  "    // Assert",
+                  "    pm.response.to.have.jsonSchema(responseSchema);",
+                  "    pm.expect(String(responseBody.message)).to.eql(String(expectedMessage));",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            },
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.variables.set(\"expectedStatusCode\", \"200\");",
+                  "pm.variables.set(\"expectedMaxResponseTimeMs\", \"3000\");",
+                  "pm.variables.set(\"expectJsonResponse\", \"true\");"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/store/order/:orderId",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "store",
+                "order",
+                ":orderId"
+              ],
+              "variable": [
+                {
+                  "key": "orderId",
+                  "value": "{{dynamicOrderId}}",
+                  "description": "Dynamic order id created during the collection run"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get deleted order by ID",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var responseBody = pm.response.json();",
+                  "pm.test(\"Deleted order returns API error schema\", function () {",
+                  "    // Arrange",
+                  "    var responseSchema = JSON.parse(pm.collectionVariables.get(\"_apiResponseSchema\"));",
+                  "",
+                  "    // Act",
+                  "",
+                  "    // Assert",
+                  "    pm.response.to.have.jsonSchema(responseSchema);",
+                  "    pm.expect(responseBody.message).to.eql(\"Order not found\");",
+                  "});",
+                  "",
+                  "pm.collectionVariables.unset(\"dynamicOrderId\");",
+                  "pm.collectionVariables.unset(\"dynamicPetIdForOrder\");"
+                ],
+                "type": "text/javascript"
+              }
+            },
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.variables.set(\"expectedStatusCode\", \"404\");",
+                  "pm.variables.set(\"expectedMaxResponseTimeMs\", \"3000\");",
+                  "pm.variables.set(\"expectJsonResponse\", \"true\");"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/store/order/:orderId",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "store",
+                "order",
+                ":orderId"
+              ],
+              "variable": [
+                {
+                  "key": "orderId",
+                  "value": "{{dynamicOrderId}}",
+                  "description": "Dynamic order id created during the collection run"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get store inventory",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var responseBody = pm.response.json();",
+                  "var responseSchema = JSON.parse(pm.collectionVariables.get(\"_inventorySchema\"));",
+                  "",
+                  "pm.test(\"Store inventory contains status counts\", function () {",
+                  "    pm.response.to.have.jsonSchema(responseSchema);",
+                  "    Object.values(responseBody).forEach((count) => pm.expect(count).to.be.a(\"number\"));",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            },
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.variables.set(\"expectedStatusCode\", \"200\");",
+                  "pm.variables.set(\"expectedMaxResponseTimeMs\", \"3000\");",
+                  "pm.variables.set(\"expectJsonResponse\", \"true\");"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/store/inventory",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "store",
+                "inventory"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "user",
+      "item": [
+        {
+          "name": "Create dynamic user",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "exec": [
+                  "pm.variables.set(\"expectedStatusCode\", \"200\");",
+                  "pm.variables.set(\"expectedMaxResponseTimeMs\", \"3000\");",
+                  "pm.variables.set(\"expectJsonResponse\", \"true\");",
+                  "const suffix = Math.floor(Math.random() * 10000000);",
+                  "pm.collectionVariables.set(\"dynamicUserId\", suffix);",
+                  "pm.collectionVariables.set(\"dynamicUsername\", \"codex_user_\" + suffix);"
+                ],
+                "type": "text/javascript"
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var responseBody = pm.response.json();",
+                  "pm.test(\"Create user response references dynamic user id\", function () {",
+                  "    // Arrange",
+                  "    var responseSchema = JSON.parse(pm.collectionVariables.get(\"_apiResponseSchema\"));",
+                  "    const expectedMessage = pm.collectionVariables.get(\"dynamicUserId\");",
+                  "",
+                  "    // Act",
+                  "",
+                  "    // Assert",
+                  "    pm.response.to.have.jsonSchema(responseSchema);",
+                  "    pm.expect(String(responseBody.message)).to.eql(String(expectedMessage));",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/user",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "user"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"id\": {{dynamicUserId}},\n  \"username\": \"{{dynamicUsername}}\",\n  \"firstName\": \"Codex\",\n  \"lastName\": \"QA\",\n  \"email\": \"{{dynamicUsername}}@example.com\",\n  \"password\": \"pass123\",\n  \"phone\": \"1234567890\",\n  \"userStatus\": 1\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get created user by username",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var responseBody = pm.response.json();",
+                  "pm.test(\"Created user can be retrieved\", function () {",
+                  "    // Arrange",
+                  "    var responseSchema = JSON.parse(pm.collectionVariables.get(\"_petstoreSchema005\"));",
+                  "    const expectedUserId = Number(pm.collectionVariables.get(\"dynamicUserId\"));",
+                  "    const expectedUsername = pm.collectionVariables.get(\"dynamicUsername\");",
+                  "",
+                  "    // Act",
+                  "",
+                  "    // Assert",
+                  "    pm.response.to.have.jsonSchema(responseSchema);",
+                  "    pm.expect(responseBody.id).to.eql(expectedUserId);",
+                  "    pm.expect(responseBody.username).to.eql(expectedUsername);",
+                  "    pm.expect(responseBody.firstName).to.eql(\"Codex\");",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            },
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.variables.set(\"expectedStatusCode\", \"200\");",
+                  "pm.variables.set(\"expectedMaxResponseTimeMs\", \"3000\");",
+                  "pm.variables.set(\"expectJsonResponse\", \"true\");"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/user/:username",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "user",
+                ":username"
+              ],
+              "variable": [
+                {
+                  "key": "username",
+                  "value": "{{dynamicUsername}}",
+                  "description": "Dynamic username created during the collection run"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Update created user",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var responseBody = pm.response.json();",
+                  "pm.test(\"Update user response references dynamic user id\", function () {",
+                  "    // Arrange",
+                  "    var responseSchema = JSON.parse(pm.collectionVariables.get(\"_apiResponseSchema\"));",
+                  "    const expectedMessage = pm.collectionVariables.get(\"dynamicUserId\");",
+                  "",
+                  "    // Act",
+                  "",
+                  "    // Assert",
+                  "    pm.response.to.have.jsonSchema(responseSchema);",
+                  "    pm.expect(String(responseBody.message)).to.eql(String(expectedMessage));",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            },
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.variables.set(\"expectedStatusCode\", \"200\");",
+                  "pm.variables.set(\"expectedMaxResponseTimeMs\", \"3000\");",
+                  "pm.variables.set(\"expectJsonResponse\", \"true\");"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/user/:username",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "user",
+                ":username"
+              ],
+              "variable": [
+                {
+                  "key": "username",
+                  "value": "{{dynamicUsername}}",
+                  "description": "Dynamic username created during the collection run"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"id\": {{dynamicUserId}},\n  \"username\": \"{{dynamicUsername}}\",\n  \"firstName\": \"UpdatedCodex\",\n  \"lastName\": \"QA\",\n  \"email\": \"updated_{{dynamicUsername}}@example.com\",\n  \"password\": \"pass123\",\n  \"phone\": \"1234567890\",\n  \"userStatus\": 1\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get updated user by username",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var responseBody = pm.response.json();",
+                  "pm.test(\"Updated user can be retrieved\", function () {",
+                  "    // Arrange",
+                  "    var responseSchema = JSON.parse(pm.collectionVariables.get(\"_petstoreSchema005\"));",
+                  "    const expectedUserId = Number(pm.collectionVariables.get(\"dynamicUserId\"));",
+                  "    const expectedUsername = pm.collectionVariables.get(\"dynamicUsername\");",
+                  "",
+                  "    // Act",
+                  "",
+                  "    // Assert",
+                  "    pm.response.to.have.jsonSchema(responseSchema);",
+                  "    pm.expect(responseBody.id).to.eql(expectedUserId);",
+                  "    pm.expect(responseBody.username).to.eql(expectedUsername);",
+                  "    pm.expect(responseBody.firstName).to.eql(\"UpdatedCodex\");",
+                  "    pm.expect(responseBody.email).to.eql(\"updated_\" + expectedUsername + \"@example.com\");",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            },
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.variables.set(\"expectedStatusCode\", \"200\");",
+                  "pm.variables.set(\"expectedMaxResponseTimeMs\", \"3000\");",
+                  "pm.variables.set(\"expectJsonResponse\", \"true\");"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/user/:username",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "user",
+                ":username"
+              ],
+              "variable": [
+                {
+                  "key": "username",
+                  "value": "{{dynamicUsername}}",
+                  "description": "Dynamic username created during the collection run"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Login created user",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var responseBody = pm.response.json();",
+                  "var responseSchema = JSON.parse(pm.collectionVariables.get(\"_apiResponseSchema\"));",
+                  "",
+                  "pm.test(\"Created user can log in\", function () {",
+                  "    pm.response.to.have.jsonSchema(responseSchema);",
+                  "    pm.expect(responseBody.code).to.eql(200);",
+                  "    pm.expect(responseBody.message).to.include(\"logged in user session\");",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            },
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.variables.set(\"expectedStatusCode\", \"200\");",
+                  "pm.variables.set(\"expectedMaxResponseTimeMs\", \"3000\");",
+                  "pm.variables.set(\"expectJsonResponse\", \"true\");"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/user/login?username={{dynamicUsername}}&password=pass123",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "user",
+                "login"
+              ],
+              "query": [
+                {
+                  "key": "username",
+                  "value": "{{dynamicUsername}}"
+                },
+                {
+                  "key": "password",
+                  "value": "pass123"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Logout current user",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var responseBody = pm.response.json();",
+                  "var responseSchema = JSON.parse(pm.collectionVariables.get(\"_apiResponseSchema\"));",
+                  "",
+                  "pm.test(\"Current user can log out\", function () {",
+                  "    pm.response.to.have.jsonSchema(responseSchema);",
+                  "    pm.expect(responseBody.code).to.eql(200);",
+                  "    pm.expect(responseBody.message).to.eql(\"ok\");",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            },
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.variables.set(\"expectedStatusCode\", \"200\");",
+                  "pm.variables.set(\"expectedMaxResponseTimeMs\", \"3000\");",
+                  "pm.variables.set(\"expectJsonResponse\", \"true\");"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/user/logout",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "user",
+                "logout"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get missing user by username",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var responseBody = pm.response.json();",
+                  "pm.test(\"Missing user returns API error schema\", function () {",
+                  "    // Arrange",
+                  "    var responseSchema = JSON.parse(pm.collectionVariables.get(\"_apiResponseSchema\"));",
+                  "",
+                  "    // Act",
+                  "",
+                  "    // Assert",
+                  "    pm.response.to.have.jsonSchema(responseSchema);",
+                  "    pm.expect(responseBody.message).to.eql(\"User not found\");",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            },
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.variables.set(\"expectedStatusCode\", \"404\");",
+                  "pm.variables.set(\"expectedMaxResponseTimeMs\", \"3000\");",
+                  "pm.variables.set(\"expectJsonResponse\", \"true\");"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/user/no_such_user_codex_999999",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "user",
+                "no_such_user_codex_999999"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Create user with malformed JSON",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var responseBody = pm.response.json();",
+                  "pm.test(\"Malformed user JSON returns API error schema\", function () {",
+                  "    // Arrange",
+                  "    var responseSchema = JSON.parse(pm.collectionVariables.get(\"_apiResponseSchema\"));",
+                  "",
+                  "    // Act",
+                  "",
+                  "    // Assert",
+                  "    pm.response.to.have.jsonSchema(responseSchema);",
+                  "    pm.expect(responseBody.message).to.eql(\"bad input\");",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            },
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.variables.set(\"expectedStatusCode\", \"400\");",
+                  "pm.variables.set(\"expectedMaxResponseTimeMs\", \"3000\");",
+                  "pm.variables.set(\"expectJsonResponse\", \"true\");"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/user",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "user"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{bad json",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Update user with malformed JSON",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var responseBody = pm.response.json();",
+                  "pm.test(\"Malformed user update JSON returns API error schema\", function () {",
+                  "    // Arrange",
+                  "    var responseSchema = JSON.parse(pm.collectionVariables.get(\"_apiResponseSchema\"));",
+                  "",
+                  "    // Act",
+                  "",
+                  "    // Assert",
+                  "    pm.response.to.have.jsonSchema(responseSchema);",
+                  "    pm.expect(responseBody.message).to.eql(\"bad input\");",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            },
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.variables.set(\"expectedStatusCode\", \"400\");",
+                  "pm.variables.set(\"expectedMaxResponseTimeMs\", \"3000\");",
+                  "pm.variables.set(\"expectJsonResponse\", \"true\");"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/user/:username",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "user",
+                ":username"
+              ],
+              "variable": [
+                {
+                  "key": "username",
+                  "value": "{{dynamicUsername}}",
+                  "description": "Dynamic username created during the collection run"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{bad json",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Delete created user",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var responseBody = pm.response.json();",
+                  "pm.test(\"Delete response references dynamic username\", function () {",
+                  "    // Arrange",
+                  "    var responseSchema = JSON.parse(pm.collectionVariables.get(\"_apiResponseSchema\"));",
+                  "    const expectedMessage = pm.collectionVariables.get(\"dynamicUsername\");",
+                  "",
+                  "    // Act",
+                  "",
+                  "    // Assert",
+                  "    pm.response.to.have.jsonSchema(responseSchema);",
+                  "    pm.expect(String(responseBody.message)).to.eql(String(expectedMessage));",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            },
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.variables.set(\"expectedStatusCode\", \"200\");",
+                  "pm.variables.set(\"expectedMaxResponseTimeMs\", \"3000\");",
+                  "pm.variables.set(\"expectJsonResponse\", \"true\");"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/user/:username",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "user",
+                ":username"
+              ],
+              "variable": [
+                {
+                  "key": "username",
+                  "value": "{{dynamicUsername}}",
+                  "description": "Dynamic username created during the collection run"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get deleted user by username",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var responseBody = pm.response.json();",
+                  "pm.test(\"Deleted user returns API error schema\", function () {",
+                  "    // Arrange",
+                  "    var responseSchema = JSON.parse(pm.collectionVariables.get(\"_apiResponseSchema\"));",
+                  "",
+                  "    // Act",
+                  "",
+                  "    // Assert",
+                  "    pm.response.to.have.jsonSchema(responseSchema);",
+                  "    pm.expect(responseBody.message).to.eql(\"User not found\");",
+                  "});",
+                  "",
+                  "pm.collectionVariables.unset(\"dynamicUserId\");",
+                  "pm.collectionVariables.unset(\"dynamicUsername\");"
+                ],
+                "type": "text/javascript"
+              }
+            },
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.variables.set(\"expectedStatusCode\", \"404\");",
+                  "pm.variables.set(\"expectedMaxResponseTimeMs\", \"3000\");",
+                  "pm.variables.set(\"expectJsonResponse\", \"true\");"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/user/:username",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "user",
+                ":username"
+              ],
+              "variable": [
+                {
+                  "key": "username",
+                  "value": "{{dynamicUsername}}",
+                  "description": "Dynamic username created during the collection run"
+                }
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "https://petstore.swagger.io/v2",
+      "type": "string"
+    },
+    {
+      "key": "dynamicPetId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "dynamicOrderId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "dynamicPetIdForOrder",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "dynamicUserId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "dynamicUsername",
+      "value": "",
+      "type": "string"
+    }
+  ],
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          "const schemas = {",
+          "    \"apiResponseSchema\": {",
+          "        \"type\": \"object\",",
+          "        \"required\": [",
+          "            \"code\",",
+          "            \"type\",",
+          "            \"message\"",
+          "        ],",
+          "        \"additionalProperties\": false,",
+          "        \"properties\": {",
+          "            \"code\": {",
+          "                \"type\": \"number\"",
+          "            },",
+          "            \"type\": {",
+          "                \"type\": \"string\"",
+          "            },",
+          "            \"message\": {",
+          "                \"type\": \"string\"",
+          "            }",
+          "        }",
+          "    },",
+          "    \"inventorySchema\": {",
+          "        \"type\": \"object\",",
+          "        \"additionalProperties\": {",
+          "            \"type\": \"number\"",
+          "        }",
+          "    },",
+          "    \"petstoreSchema001\": {",
+          "        \"type\": \"object\",",
+          "        \"required\": [",
+          "            \"id\",",
+          "            \"category\",",
+          "            \"name\",",
+          "            \"photoUrls\",",
+          "            \"tags\",",
+          "            \"status\"",
+          "        ],",
+          "        \"additionalProperties\": false,",
+          "        \"properties\": {",
+          "            \"id\": {",
+          "                \"type\": \"number\"",
+          "            },",
+          "            \"category\": {",
+          "                \"type\": \"object\",",
+          "                \"required\": [",
+          "                    \"id\",",
+          "                    \"name\"",
+          "                ],",
+          "                \"additionalProperties\": false,",
+          "                \"properties\": {",
+          "                    \"id\": {",
+          "                        \"type\": \"number\"",
+          "                    },",
+          "                    \"name\": {",
+          "                        \"type\": \"string\"",
+          "                    }",
+          "                }",
+          "            },",
+          "            \"name\": {",
+          "                \"type\": \"string\"",
+          "            },",
+          "            \"photoUrls\": {",
+          "                \"type\": \"array\",",
+          "                \"items\": {",
+          "                    \"type\": \"string\"",
+          "                }",
+          "            },",
+          "            \"tags\": {",
+          "                \"type\": \"array\",",
+          "                \"items\": {",
+          "                    \"type\": \"object\",",
+          "                    \"required\": [",
+          "                        \"id\",",
+          "                        \"name\"",
+          "                    ],",
+          "                    \"additionalProperties\": false,",
+          "                    \"properties\": {",
+          "                        \"id\": {",
+          "                            \"type\": \"number\"",
+          "                        },",
+          "                        \"name\": {",
+          "                            \"type\": \"string\"",
+          "                        }",
+          "                    }",
+          "                }",
+          "            },",
+          "            \"status\": {",
+          "                \"type\": \"string\"",
+          "            }",
+          "        }",
+          "    },",
+          "    \"petstoreSchema002\": {",
+          "        \"type\": \"array\"",
+          "    },",
+          "    \"petstoreSchema003\": {",
+          "        \"type\": \"array\",",
+          "        \"maxItems\": 0",
+          "    },",
+          "    \"petstoreSchema004\": {",
+          "        \"type\": \"object\",",
+          "        \"required\": [",
+          "            \"id\",",
+          "            \"petId\",",
+          "            \"quantity\",",
+          "            \"shipDate\",",
+          "            \"status\",",
+          "            \"complete\"",
+          "        ],",
+          "        \"additionalProperties\": false,",
+          "        \"properties\": {",
+          "            \"id\": {",
+          "                \"type\": \"number\"",
+          "            },",
+          "            \"petId\": {",
+          "                \"type\": \"number\"",
+          "            },",
+          "            \"quantity\": {",
+          "                \"type\": \"number\"",
+          "            },",
+          "            \"shipDate\": {",
+          "                \"type\": \"string\"",
+          "            },",
+          "            \"status\": {",
+          "                \"type\": \"string\"",
+          "            },",
+          "            \"complete\": {",
+          "                \"type\": \"boolean\"",
+          "            }",
+          "        }",
+          "    },",
+          "    \"petstoreSchema005\": {",
+          "        \"type\": \"object\",",
+          "        \"required\": [",
+          "            \"id\",",
+          "            \"username\",",
+          "            \"firstName\",",
+          "            \"lastName\",",
+          "            \"email\",",
+          "            \"password\",",
+          "            \"phone\",",
+          "            \"userStatus\"",
+          "        ],",
+          "        \"additionalProperties\": false,",
+          "        \"properties\": {",
+          "            \"id\": {",
+          "                \"type\": \"number\"",
+          "            },",
+          "            \"username\": {",
+          "                \"type\": \"string\"",
+          "            },",
+          "            \"firstName\": {",
+          "                \"type\": \"string\"",
+          "            },",
+          "            \"lastName\": {",
+          "                \"type\": \"string\"",
+          "            },",
+          "            \"email\": {",
+          "                \"type\": \"string\"",
+          "            },",
+          "            \"password\": {",
+          "                \"type\": \"string\"",
+          "            },",
+          "            \"phone\": {",
+          "                \"type\": \"string\"",
+          "            },",
+          "            \"userStatus\": {",
+          "                \"type\": \"number\"",
+          "            }",
+          "        }",
+          "    }",
+          "};",
+          "",
+          "Object.entries(schemas).forEach(([key, schema]) => {",
+          "    pm.collectionVariables.set(`_${key}`, JSON.stringify(schema));",
+          "});"
+        ]
+      }
+    },
+    {
+      "listen": "test",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          "const expectedStatusCode = Number(pm.variables.get(\"expectedStatusCode\") || 200);",
+          "const expectedMaxResponseTimeMs = Number(pm.variables.get(\"expectedMaxResponseTimeMs\") || 3000);",
+          "const expectJsonResponse = pm.variables.get(\"expectJsonResponse\") === \"true\";",
+          "",
+          "pm.test(`[${pm.info.requestName}] status code is ${expectedStatusCode}`, function () {",
+          "    pm.expect(pm.response.code).to.eql(expectedStatusCode);",
+          "});",
+          "",
+          "pm.test(`[${pm.info.requestName}] response time is below ${expectedMaxResponseTimeMs}ms`, function () {",
+          "    pm.expect(pm.response.responseTime).to.be.below(expectedMaxResponseTimeMs);",
+          "});",
+          "",
+          "if (expectJsonResponse) {",
+          "    pm.test(`[${pm.info.requestName}] Content-Type is JSON`, function () {",
+          "        pm.response.to.have.header(\"Content-Type\");",
+          "        pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");",
+          "    });",
+          "}",
+          "",
+          "pm.test(`[${pm.info.requestName}] common response headers are valid`, function () {",
+          "    const contentLength = pm.response.headers.get(\"Content-Length\");",
+          "    const poweredBy = pm.response.headers.get(\"X-Powered-By\");",
+          "    const cors = pm.response.headers.get(\"Access-Control-Allow-Origin\");",
+          "",
+          "    if (contentLength !== null && contentLength !== undefined) {",
+          "        pm.expect(Number(contentLength)).to.not.be.NaN;",
+          "    }",
+          "",
+          "    if (poweredBy) {",
+          "        pm.expect(poweredBy).to.be.a(\"string\").and.not.empty;",
+          "    }",
+          "",
+          "    if (cors) {",
+          "        pm.expect(cors).to.be.a(\"string\").and.not.empty;",
+          "    }",
+          "});"
+        ]
+      }
+    }
+  ]
 }

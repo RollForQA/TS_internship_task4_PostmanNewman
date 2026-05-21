@@ -1,0 +1,14 @@
+{
+  "id": "6f5d2b10-b030-4f2c-a4c8-3d4f6b9e5e52",
+  "name": "Store CI environment",
+  "values": [
+    {
+      "key": "baseUrl",
+      "value": "http://127.0.0.1:3000",
+      "type": "default",
+      "enabled": true
+    }
+  ],
+  "_postman_variable_scope": "environment",
+  "_postman_exported_using": "Codex"
+}
